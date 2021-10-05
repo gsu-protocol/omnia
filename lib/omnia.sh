@@ -20,7 +20,7 @@ fi
 
 #initialize environment
 initEnv () {
-	OMNIA_VERSION="$(cat ./version)"
+	OMNIA_VERSION="$(cat ../version)"
 
 	#Load Global configuration
 	importEnv
