@@ -6,6 +6,7 @@ _LIB_DIR="${BASH_SOURCE[0]%/*}/../lib"
 
 source $_LIB_DIR/log.sh
 
+# log calls to seth
 verbose --list "seth call" "$@"
 
 exec seth "$@"
