@@ -3,15 +3,13 @@
 
 let
   tapsh = if (builtins.pathExists ./tap.sh) then ./tap.sh else ../tests/lib/tap.sh;
-  deps =
-    [ coreutils bash parallel bc jq gnused datamash gnugrep ssb-server ethsign seth setzer-mcd stark-cli oracle-suite curl ];
 
 in stdenv.mkDerivation rec {
   name = "omnia-${version}";
   version = lib.fileContents ./version;
   src = ./.;
 
-  buildInputs = deps;
+  buildInputs = [ coreutils bash parallel bc jq gnused datamash gnugrep ssb-server ethsign seth setzer-mcd stark-cli oracle-suite curl ];
   nativeBuildInputs = [ makeWrapper ];
   passthru.runtimeDeps = buildInputs;
 
@@ -39,8 +37,6 @@ in stdenv.mkDerivation rec {
     cp -r ./bin $out/bin
     chmod +x $out/bin/*
 
-    cp -r ./config $out/config
-
     find $out/bin -type f | while read -r x; do
       wrapProgram "$x" \
         --prefix PATH : "$out/bin:${path}" \
@@ -49,8 +45,8 @@ in stdenv.mkDerivation rec {
   '';
 
   meta = with lib; {
-    description = "Omnia is a smart contract oracle client";
-    homepage = "https://github.com/makerdao/oracles-v2";
+    description = "Omnia is a Feed and Relay Oracle client";
+    homepage = "https://github.com/chronicleprotocol/omnia";
     license = licenses.gpl3;
     inherit version;
   };
