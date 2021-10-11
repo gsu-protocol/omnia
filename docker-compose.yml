@@ -1,0 +1,13 @@
+version: '3'
+services:
+  # geth:
+  #   image: 'ethereum/client-go:stable'
+  #   container_name: geth.local
+  #   ports: 
+  #     - "8545:8545"
+  #     - "30303:30303"
+  #   volumes:
+  #     - "./geth/data:/home/geth/data"
+  #     - "./geth/config:/home/geth/config"
+  #   command: --datadir /home/geth/data --keystore /home/geth/config/keystore --networkid 99 --lightkdf --nodiscover --maxpeers=0 --port=0 --nousb --ipcdisable --mine --miner.threads 1 --http --http.port 8545 --http.api admin,personal,eth,miner,debug,txpool,net,web3 --http.addr 0.0.0.0 --http.corsdomain * --http.vhosts * --password=./config/password
+  # omnia:
