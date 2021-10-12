@@ -57,6 +57,9 @@ RUN git clone https://github.com/makerdao/setzer-mcd.git \
 # Requirements for starkware
 RUN pip install mpmath sympy ecdsa==0.16.0
 
+# Disabling parallel notification
+RUN printf 'will cite' | parallel --citation; exit 0
+
 # Setting up PATH for seth, setzer and omnia bin folder
 # Here we have set of different pathes included:
 # - /home/omnia/seth - For `seth` executable
