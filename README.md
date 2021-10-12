@@ -30,3 +30,28 @@ To run `omnia` in container from prev command you can use `omnia` command:
 $ omnia
 Importing configuration from /home/omnia/config/feed.conf...
 ```
+
+## Docker compose
+For even more easy development we providing you with `docker-compose.yml` file that will help to set everything up for you.
+
+Right now it contains `omnia_feed` container. 
+It contains working feed configuration + spire integration.
+
+And `spire` container with configured spire agent that will be called from `omnia_feed`.
+
+**Where to take `chroniclelabs/spire:latest` image ?**
+For now you have to build it manually from [Oracle Suite](https://github.com/makerdao/oracle-suite) repo.
+
+Example of usage: 
+
+1. Starting Spire Agent
+
+```bash
+$ docker-compose up -d spire
+```
+
+2. Running omnia with bash:
+
+```bash
+$ docker-compose run --rm omnia_feed /bin/bash
+```
