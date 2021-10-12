@@ -41,6 +41,11 @@ And `spire` container with configured spire agent that will be called from `omni
 
 **Where to take `chroniclelabs/spire:latest` image ?**
 For now you have to build it manually from [Oracle Suite](https://github.com/makerdao/oracle-suite) repo.
+Command for building image:
+
+```bash
+$ docker build -t chroniclelabs/spire:latest -f Dockerfile-spire .
+```
 
 Example of usage: 
 
