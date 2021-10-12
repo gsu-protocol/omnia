@@ -29,17 +29,20 @@ stdenv.mkDerivation rec {
   in ''
     mkdir -p $out
 
+    cp -r ./version $out/version
     cp -r ./lib $out/lib
 
     cp -r ./bin $out/bin
     chmod +x $out/bin/*
+    find $out/bin -type f | while read -r x; do
+      wrapProgram "$x" \
+        --prefix PATH : "$out/exec:${path}" \
+        ${locales}
+    done
 
     cp -r ./exec $out/exec
     chmod +x $out/exec/*
-
-    cp -r ./version $out/version
-
-    find $out/bin -type f | while read -r x; do
+    find $out/exec -type f | while read -r x; do
       wrapProgram "$x" \
         --prefix PATH : "$out/exec:${path}" \
         ${locales}
