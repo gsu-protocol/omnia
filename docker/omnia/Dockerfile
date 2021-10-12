@@ -36,6 +36,8 @@ COPY ./lib /home/omnia/lib/
 COPY ./docker/keystore/ /home/omnia/keystore/
 COPY ./docker/omnia/config/ /home/omnia/config/
 COPY ./version /home/omnia/version
+# Copy Spire configuration
+COPY ./docker/spire/config/client.json /home/omnia/spire.json
 
 # Add a non-root user
 RUN adduser -D omnia \
@@ -70,5 +72,6 @@ RUN printf 'will cite' | parallel --citation; exit 0
 ENV PATH="/home/omnia/seth:/home/omnia/setzer:/home/omnia/starkware:/home/omnia/bin:/home/omnia/.local/bin:${PATH}"
 
 ENV OMNIA_CONFIG /home/omnia/config/feed.conf
+ENV SPIRE_CONFIG /home/omnia/spire.json
 
 CMD ["bin/omnia"]
