@@ -6,21 +6,21 @@ if [[ -n $OMNIA_DEBUG ]]; then
 	set -x
 fi
 
-LIB_DIR="${0%/*/*}/lib"
+(cd "${0%/*/*}/lib"
 
-source "$LIB_DIR/config.sh"
-source "$LIB_DIR/gasprice.sh"
-source "$LIB_DIR/ethereum.sh"
-source "$LIB_DIR/log.sh"
-source "$LIB_DIR/scuttlebot.sh"
-source "$LIB_DIR/source.sh"
-source "$LIB_DIR/status.sh"
-source "$LIB_DIR/util.sh"
-source "$LIB_DIR/transport.sh"
-source "$LIB_DIR/feed.sh"
-source "$LIB_DIR/relayer.sh"
-source "$LIB_DIR/omnia.sh"
+source ./config.sh
+source ./gasprice.sh
+source ./ethereum.sh
+source ./log.sh
+source ./scuttlebot.sh
+source ./source.sh
+source ./status.sh
+source ./util.sh
+source ./transport.sh
+source ./feed.sh
+source ./relayer.sh
+source ./omnia.sh
 
-initEnv
 [[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && runRelayer
 [[ "$OMNIA_MODE" == "FEED" ]] && runFeed
+)
