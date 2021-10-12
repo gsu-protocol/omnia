@@ -6,7 +6,7 @@ if [[ -n $OMNIA_DEBUG ]]; then
 	set -x
 fi
 
-LIB_DIR="${BASH_SOURCE[0]%/*/*}/lib"
+LIB_DIR="${0%/*/*}/lib"
 
 source "$LIB_DIR/config.sh"
 source "$LIB_DIR/gasprice.sh"

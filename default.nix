@@ -30,14 +30,18 @@ stdenv.mkDerivation rec {
     mkdir -p $out
 
     cp -r ./lib $out/lib
-    chmod +x $out/lib/omnia.sh
 
     cp -r ./bin $out/bin
     chmod +x $out/bin/*
 
+    cp -r ./exec $out/exec
+    chmod +x $out/exec/*
+
+    cp -r ./version $out/version
+
     find $out/bin -type f | while read -r x; do
       wrapProgram "$x" \
-        --prefix PATH : "$out/bin:${path}" \
+        --prefix PATH : "$out/exec:${path}" \
         ${locales}
     done
   '';
