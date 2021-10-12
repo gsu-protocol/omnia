@@ -1,10 +1,8 @@
-{ stdenv, makeWrapper, runCommand, lib, glibcLocales, coreutils, bash, parallel, bc, jq, gnused, datamash, gnugrep, ssb-server
-, ethsign, seth, setzer-mcd, stark-cli, oracle-suite, curl }:
+{ stdenv, makeWrapper, runCommand, lib, glibcLocales, coreutils, bash, parallel, bc, jq, gnused, datamash, gnugrep, curl
+, ethsign, seth, setzer-mcd, stark-cli
+, ssb-server, oracle-suite }:
 
-let
-  tapsh = if (builtins.pathExists ./tap.sh) then ./tap.sh else ../tests/lib/tap.sh;
-
-in stdenv.mkDerivation rec {
+stdenv.mkDerivation rec {
   name = "omnia-${version}";
   version = lib.fileContents ./version;
   src = ./.;
@@ -15,11 +13,11 @@ in stdenv.mkDerivation rec {
 
   buildPhase = ''
     find ./bin -type f | while read -r x; do patchShebangs "$x"; done
+    find ./exec -type f | while read -r x; do patchShebangs "$x"; done
   '';
 
   doCheck = true;
   checkPhase = ''
-    cp ${tapsh} ./tap.sh
     find . -name '*_test*' -or -path "*/test/*.sh" | while read -r x; do
       patchShebangs "$x"; $x
     done
