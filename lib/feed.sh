@@ -30,7 +30,7 @@ readSourcesAndBroadcastAllPriceMessages()  {
 			local _message=$(validateAndConstructMessage "$_assetPair" "$_median"	"$_sources")
 
 			if [[ -z "$_message" ]]; then
-				error "Failed constructing $_assetPair price message"
+				error "Failed constructing price message" "asset=$_assetPair" "src=$_src"
 				continue
 			fi
 
