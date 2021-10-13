@@ -27,6 +27,8 @@ services:
     volumes:
       - "./docker/ssb-server/config/server.json:/root/.ssb/config"
   omnia_feed:
+    depends_on:
+      - spire
     build:
       context: "."
       dockerfile: "docker/omnia/Dockerfile"
