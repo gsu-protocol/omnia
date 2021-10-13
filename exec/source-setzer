@@ -4,7 +4,7 @@ if [[ -n $OMNIA_DEBUG ]]; then set -x; fi
 
 cd "$(cd "${0%/*/*}" && pwd)/lib"
 source ./log.sh
-verbose --list "setzer call" "$@"
+verbose --list "setzer()" "$@"
 
 export ETH_RPC_URL="$SETZER_ETH_RPC_URL"
 

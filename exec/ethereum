@@ -4,6 +4,6 @@ if [[ -n $OMNIA_DEBUG ]]; then set -x; fi
 
 cd "$(cd "${0%/*/*}" && pwd)/lib"
 source ./log.sh
-verbose --list "seth call" "$@"
+verbose --list "seth()" "$@"
 
 exec seth "$@"
