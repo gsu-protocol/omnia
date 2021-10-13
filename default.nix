@@ -19,7 +19,8 @@ stdenv.mkDerivation rec {
   doCheck = true;
   checkPhase = ''
     find . -name '*_test*' -or -path "*/test/*.sh" | while read -r x; do
-      patchShebangs "$x"; $x
+      patchShebangs "$x"
+      PATH="./exec:$PATH" $x
     done
   '';
 

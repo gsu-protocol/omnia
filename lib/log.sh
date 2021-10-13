@@ -21,7 +21,7 @@ function warning() {
 
 #log debug information after error
 function debug() {
-	if  [[ -n $OMNIA_DEBUG ]] && [[ $OMNIA_DEBUG != "false" ]] && [[ $OMNIA_DEBUG != "0" ]]; then
+	if [[ -n $OMNIA_DEBUG ]] && [[ $OMNIA_DEBUG != "false" ]] && [[ $OMNIA_DEBUG != "0" ]]; then
 		_log "debug" "$@" >&2
 	fi
 }
@@ -60,6 +60,8 @@ function _log() {
 		else
 			if [[ $_argType == "list" ]]; then
 				_logEntry="$(_jsonArgs "level=$_level" "msg=$_msg" "time#=$(date "+%s")" "#=$(_jsonList "$@")")"
+			elif [[ $_argType == "raw" ]]; then
+				_logEntry="$(_jsonArgs "level=$_level" "msg=$_msg" "time#=$(date "+%s")" "#=$*")"
 			else
 				_logEntry="$(_jsonArgs "level=$_level" "msg=$_msg" "time#=$(date "+%s")" "#=$(_jsonArgs "$@")")"
 			fi
