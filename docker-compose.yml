@@ -10,6 +10,22 @@ services:
   #     - "./geth/data:/home/geth/data"
   #     - "./geth/config:/home/geth/config"
   #   command: --datadir /home/geth/data --keystore /home/geth/config/keystore --networkid 99 --lightkdf --nodiscover --maxpeers=0 --port=0 --nousb --ipcdisable --mine --miner.threads 1 --http --http.port 8545 --http.api admin,personal,eth,miner,debug,txpool,net,web3 --http.addr 0.0.0.0 --http.corsdomain * --http.vhosts * --password=./config/password
+  ssb_client:
+    build:
+      context: "."
+      dockerfile: "docker/ssb-server/Dockerfile"
+    volumes:
+      - "./docker/ssb-server/config/client.json:/root/.ssb/config"
+    command: ["/bin/sh"]
+  ssb_server:
+    container_name: ssb.local
+    build:
+      context: "."
+      dockerfile: "docker/ssb-server/Dockerfile"
+    ports:
+      - "8008:8008"
+    volumes:
+      - "./docker/ssb-server/config/server.json:/root/.ssb/config"
   omnia_feed:
     build:
       context: "."
@@ -18,6 +34,7 @@ services:
       - "./lib:/home/omnia/lib"
       - "./test:/home/omnia/test"
       - "./docker/spire/config/client.json:/home/omnia/spire.json"
+      - "./docker/ssb-server/config/client.json:/home/omnia/.ssb/config"
   spire:
     image: chroniclelabs/spire:latest
     container_name: spire.local

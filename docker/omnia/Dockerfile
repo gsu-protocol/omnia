@@ -25,7 +25,8 @@ RUN export CGO_ENABLED=1 \
 # Building final omnia container
 FROM alpine:edge
 
-RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ca-certificates jq bash curl git agrep perl nodejs datamash jshon parallel python3 py3-pip
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ca-certificates jq bash curl git agrep perl \
+  nodejs npm datamash jshon parallel python3 py3-pip make g++
 
 COPY --from=ethsign-builder /go/src/ethsign/dist/ /usr/local/bin/
 COPY --from=spire-builder /go/src/spire/dist/ /usr/local/bin/
@@ -38,6 +39,14 @@ COPY ./docker/omnia/config/ /home/omnia/config/
 COPY ./version /home/omnia/version
 # Copy Spire configuration
 COPY ./docker/spire/config/client.json /home/omnia/spire.json
+
+# SSB requirements
+COPY docker/ssb-server/config/secret /home/omnia/.ssb/secret
+COPY docker/ssb-server/config/manifest.json /home/omnia/.ssb/manifest.json
+COPY docker/ssb-server/config/client.json /home/omnia/.ssb/config
+
+# Installing ssb client only
+RUN npm install -g --no-optional ssb-server
 
 # Add a non-root user
 RUN adduser -D omnia \
@@ -70,6 +79,9 @@ RUN printf 'will cite' | parallel --citation; exit 0
 # - /home/omnia/bin - Omnia and transports executables
 # - /home/omnia/.local/bin - for pip (Python 3) packages required for Starkware
 ENV PATH="/home/omnia/seth:/home/omnia/setzer:/home/omnia/starkware:/home/omnia/bin:/home/omnia/.local/bin:${PATH}"
+
+# Disable 'sodium-native' warning message
+ENV CHLORIDE_JS='1'
 
 ENV OMNIA_CONFIG /home/omnia/config/feed.conf
 ENV SPIRE_CONFIG /home/omnia/spire.json
