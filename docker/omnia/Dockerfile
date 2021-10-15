@@ -38,7 +38,7 @@ COPY ./docker/keystore/ /home/omnia/keystore/
 COPY ./docker/omnia/config/ /home/omnia/config/
 COPY ./version /home/omnia/version
 # Copy Spire configuration
-COPY ./docker/spire/config/client.json /home/omnia/spire.json
+COPY ./docker/spire/config/client_feed.json /home/omnia/spire.json
 
 # SSB requirements
 COPY docker/ssb-server/config/secret /home/omnia/.ssb/secret
@@ -89,8 +89,5 @@ ENV SPIRE_CONFIG /home/omnia/spire.json
 # Setting up seth
 ENV ETH_RPC_URL=http://geth.local:8545
 ENV ETH_GAS=7000000
-ENV ETH_KEYSTORE=/root/keystore
-ENV ETH_PASSWORD=/root/keystore/password
-ENV ETH_FROM=0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6
 
 CMD ["bin/omnia"]

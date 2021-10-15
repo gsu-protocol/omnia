@@ -12,7 +12,7 @@ services:
       # - "./docker/geth/data:/home/geth/data"
       - "./docker/geth/config:/home/geth/config"
       - "./docker/keystore:/home/geth/keystore"
-    command: --datadir /home/geth/data --keystore /home/geth/keystore --allow-insecure-unlock --unlock 0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6 --networkid 99 --lightkdf --nodiscover --maxpeers=0 --port=0 --nousb --ipcdisable --mine --miner.threads 1 --miner.etherbase 0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6 --http --http.port 8545 --http.api admin,personal,eth,miner,debug,txpool,net,web3 --http.addr 0.0.0.0 --http.corsdomain * --http.vhosts * --password=/home/geth/keystore/password
+    command: --datadir /home/geth/data --keystore /home/geth/keystore --allow-insecure-unlock --unlock 0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6,0xfadad77b3a7e5a84a1f7ded081e785585d4ffaf3,0x3980aa37f838bec2e457445d943feb3af98ff036 --networkid 99 --lightkdf --nodiscover --maxpeers=0 --port=0 --nousb --ipcdisable --mine --miner.threads 1 --miner.etherbase 0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6 --http --http.port 8545 --http.api admin,personal,eth,miner,debug,txpool,net,web3 --http.addr 0.0.0.0 --http.corsdomain * --http.vhosts * --password=/home/geth/keystore/password
   deployer:
     build:
       context: "."
@@ -38,21 +38,52 @@ services:
       - "./docker/ssb-server/config/server.json:/root/.ssb/config"
   omnia_feed:
     depends_on:
-      - spire
+      - spire_feed
     build:
       context: "."
       dockerfile: "docker/omnia/Dockerfile"
     volumes:
       - "./lib:/home/omnia/lib"
       - "./test:/home/omnia/test"
-      - "./docker/spire/config/client.json:/home/omnia/spire.json"
+      - "./docker/omnia/config/feed.conf:/home/omnia/config/feed.conf"
+      - "./docker/spire/config/client_feed.json:/home/omnia/spire.json"
       - "./docker/ssb-server/config/client.json:/home/omnia/.ssb/config"
-  spire:
+    environment:
+      OMNIA_CONFIG: /home/omnia/config/feed.conf
+  omnia_relay:
+    depends_on:
+      - spire_relay
+      - geth
+    build:
+      context: "."
+      dockerfile: "docker/omnia/Dockerfile"
+    volumes:
+      - "./lib:/home/omnia/lib"
+      - "./test:/home/omnia/test"
+      - "./docker/omnia/config/relay.conf:/home/omnia/config/relay.conf"
+      - "./docker/spire/config/client_relay.json:/home/omnia/spire.json"
+      - "./docker/ssb-server/config/client.json:/home/omnia/.ssb/config"
+    environment:
+      OMNIA_CONFIG: /home/omnia/config/relay.conf
+  spire_feed:
     image: chroniclelabs/spire:latest
-    container_name: spire.local
+    container_name: spire_feed.local
+    expose:
+      - "8000"
     ports:
       - "9100:9100"
     command: ["-c", "/root/spire.json", "agent"]
     volumes:
       - "./docker/keystore:/root/keystore"
-      - "./docker/spire/config/agent.json:/root/spire.json"
+      - "./docker/spire/config/agent_feed.json:/root/spire.json"
+  spire_relay:
+    image: chroniclelabs/spire:latest
+    container_name: spire_relay.local
+    expose:
+      - "8000"
+    ports:
+      - "9101:9100"
+    command: ["-c", "/root/spire.json", "agent"]
+    volumes:
+      - "./docker/keystore:/root/keystore"
+      - "./docker/spire/config/agent_relay.json:/root/spire.json"
