@@ -31,6 +31,10 @@ RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ca-c
 COPY --from=ethsign-builder /go/src/ethsign/dist/ /usr/local/bin/
 COPY --from=spire-builder /go/src/spire/dist/ /usr/local/bin/
 
+# Copy HEVM for omnia relayer
+COPY ./docker/geth/bin/hevm /usr/local/bin/
+RUN chmod +x /usr/local/bin/hevm
+
 COPY ./docker/starkware /home/omnia/starkware
 COPY ./bin /home/omnia/bin/
 COPY ./lib /home/omnia/lib/
