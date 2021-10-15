@@ -86,4 +86,11 @@ ENV CHLORIDE_JS='1'
 ENV OMNIA_CONFIG /home/omnia/config/feed.conf
 ENV SPIRE_CONFIG /home/omnia/spire.json
 
+# Setting up seth
+ENV ETH_RPC_URL=http://geth.local:8545
+ENV ETH_GAS=7000000
+ENV ETH_KEYSTORE=/root/keystore
+ENV ETH_PASSWORD=/root/keystore/password
+ENV ETH_FROM=0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6
+
 CMD ["bin/omnia"]
