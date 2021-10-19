@@ -9,10 +9,10 @@ services:
       - "8545:8545"
       - "30303:30303"
     volumes:
-      # - "./docker/geth/data:/home/geth/data"
+      - "./docker/geth/data:/home/geth/data"
       - "./docker/geth/config:/home/geth/config"
       - "./docker/keystore:/home/geth/keystore"
-    command: --datadir /home/geth/data --keystore /home/geth/keystore --allow-insecure-unlock --unlock 0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6,0xfadad77b3a7e5a84a1f7ded081e785585d4ffaf3,0x3980aa37f838bec2e457445d943feb3af98ff036 --networkid 99 --lightkdf --nodiscover --maxpeers=0 --port=0 --nousb --ipcdisable --mine --miner.threads 1 --miner.etherbase 0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6 --http --http.port 8545 --http.api admin,personal,eth,miner,debug,txpool,net,web3 --http.addr 0.0.0.0 --http.corsdomain * --http.vhosts * --password=/home/geth/keystore/password
+    command: --datadir /home/geth/data --keystore /home/geth/keystore --networkid 99 --allow-insecure-unlock --unlock 0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6,0xfadad77b3a7e5a84a1f7ded081e785585d4ffaf3,0x3980aa37f838bec2e457445d943feb3af98ff036 --networkid 99 --lightkdf --nodiscover --maxpeers=0 --port=0 --nousb --ipcdisable --mine --miner.threads 1 --miner.etherbase 0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6 --http --http.port 8545 --http.api admin,personal,eth,miner,debug,txpool,net,web3 --http.addr 0.0.0.0 --http.corsdomain * --http.vhosts * --rpc.allow-unprotected-txs --password=/home/geth/keystore/password
   deployer:
     build:
       context: "."
