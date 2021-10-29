@@ -66,7 +66,7 @@ services:
     environment:
       OMNIA_CONFIG: /home/omnia/config/relay.conf
   spire_feed:
-    image: chroniclelabs/spire:latest
+    image: ghcr.io/chronicleprotocol/spire:latest
     container_name: spire_feed.local
     expose:
       - "8000"
@@ -77,7 +77,7 @@ services:
       - "./docker/keystore:/root/keystore"
       - "./docker/spire/config/agent_feed.json:/root/spire.json"
   spire_relay:
-    image: chroniclelabs/spire:latest
+    image: ghcr.io/chronicleprotocol/spire:latest
     container_name: spire_relay.local
     expose:
       - "8000"
