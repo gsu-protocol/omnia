@@ -1,36 +1,8 @@
-# ethsign build stage
-FROM golang:1-alpine as ethsign-builder
-
-RUN apk --no-cache add git
-
-WORKDIR /go/src/ethsign
-RUN git clone https://github.com/dapphub/dapptools.git .
-RUN export CGO_ENABLED=0 \
-  && mkdir dist \
-  && cd src/ethsign/ \
-  && go mod tidy \
-  && go mod download \
-  && go build -o ../../dist/ethsign ./ethsign.go
-
-FROM alpine:edge
-
-RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing \
-  bash jq curl git nodejs python3 make jshon
-
-# Downloading dapp
-RUN git clone https://github.com/dapphub/dapptools.git \
-  && cp -R dapptools/src/dapp/ /root/dapp \
-  && cp -R dapptools/src/seth/libexec/seth /root/seth \
-  && rm -rf dapptools
+FROM ghcr.io/chronicleprotocol/base:latest
 
 WORKDIR /home/dapp
-
-COPY --from=ethsign-builder /go/src/ethsign/dist/ /usr/local/bin/
-
-COPY ./docker/geth/bin/ /root/bin
+COPY ./docker/geth/bin/median-deploy /usr/local/bin/median-deploy
 COPY ./docker/keystore /root/keystore
-
-ENV PATH="/root/dapp/libexec/dapp:/root/seth:/root/bin:${PATH}"
 
 RUN git clone --recurse-submodules https://github.com/makerdao/testchain-medians.git . \
   && dapp build
