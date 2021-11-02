@@ -17,6 +17,8 @@ ARG SETZER_BRANCH="v0.4.0"
 RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing \
   ca-certificates agrep perl npm datamash parallel py3-pip g++
 
+WORKDIR /home/omnia
+
 COPY --from=spire-builder /go/src/spire/dist/ /usr/local/bin/
 
 COPY ./docker/starkware /home/omnia/starkware
@@ -47,8 +49,6 @@ RUN pip install mpmath sympy ecdsa==0.16.0
 
 # Disabling parallel notification
 RUN printf 'will cite' | parallel --citation; exit 0
-
-WORKDIR /home/omnia
 
 # Setting up PATH for seth, setzer and omnia bin folder
 # Here we have set of different pathes included:
