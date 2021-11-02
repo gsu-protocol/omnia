@@ -69,4 +69,4 @@ ENV SPIRE_CONFIG /home/omnia/spire.json
 ENV ETH_RPC_URL=http://geth.local:8545
 ENV ETH_GAS=7000000
 
-CMD ["bin/omnia"]
+CMD ["omnia"]
