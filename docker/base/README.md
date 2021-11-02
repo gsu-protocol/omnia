@@ -16,3 +16,9 @@ List of preinstalled tools:
  - ethsign v0.17.0
  - dapp v0.34.1
  - seth 
+
+### Prebuilding image locally
+
+```bash
+$ docker build -t ghcr.io/chronicleprotocol/base -f ./docker/base/Dockerfile .
+```
