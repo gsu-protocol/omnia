@@ -40,7 +40,7 @@ COPY docker/ssb-server/config/client.json /home/omnia/.ssb/config
 RUN npm install -g --no-optional ssb-server
 
 # Installing setzer
-RUN git clone https://github.com/makerdao/setzer-mcd.git \
+RUN git clone -b ${SETZER_BRANCH} https://github.com/makerdao/setzer-mcd.git \
   && cp -R setzer-mcd/libexec/setzer/ /home/omnia/setzer \
   && rm -rf setzer-mcd
 
