@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.14
+FROM node@sha256:366c71eebb0da62a832729de2ffc974987b5b00ab25ed6a5bd8d707219b65de4
 
 RUN apk add bash
 
