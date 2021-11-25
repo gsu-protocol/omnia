@@ -34,6 +34,18 @@ $ omnia
 Importing configuration from /home/omnia/config/feed.conf...
 ```
 
+## SSB Image requirements
+
+`node:lts-alpine` has some major changes and now it does not include `python` and `make` anymore.
+So we will have to rework SSB images.
+
+For now it requires special Docker `node` base image.
+So before building this image run command:
+
+```bash
+$ doc pull node:lts-alpine3.14@sha256:366c71eebb0da62a832729de2ffc974987b5b00ab25ed6a5bd8d707219b65de4
+```
+
 ## Docker compose
 For even more easy development we providing you with `docker-compose.yml` file that will help to set everything up for you.
 
