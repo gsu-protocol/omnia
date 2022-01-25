@@ -23,7 +23,10 @@ isntStale() {
 }
 
 getMyId() {
-	ssb-server whoami 2> /dev/null | jq -r '.id'
+	ssb-rpc-client \
+		--keys "$SSB_KEYS" --caps "$SSB_CONFIG" \
+		--host "$SSB_HOST" --port "$SSB_PORT" \
+		whoami 2> /dev/null | jq -r '.id'
 }
 
 getId() {
@@ -42,12 +45,13 @@ pullLatestFeedMsgOfType() {
 	_assetPair=${_assetPair/\/}
 	_assetPair=${_assetPair^^}
 	local _msg;
-	if _msg=$(ssb-server createUserStream --id "$_feedId" --limit "$OMNIA_MSG_LIMIT" --reverse --fillCache 1)
+	if _msg=$(ssb-rpc-client \
+		--keys "$SSB_KEYS" --caps "$SSB_CONFIG" \
+		--host "$SSB_HOST" --port "$SSB_PORT" \
+		pull --id "$_feedId" --type "$_assetPair" --limit "$OMNIA_MSG_LIMIT")
 	then
-		jq -scM --arg pair "$_assetPair" '
-			[.[] | select(.value.content.type == $pair)]
-			| max_by(.value.content.time)
-			| {
+		jq -cM '
+			{
 				author: .value.author,
 				version: .value.content.version,
 				time: .value.content.time,
@@ -60,7 +64,7 @@ pullLatestFeedMsgOfType() {
 				signature: .value.content.signature
 			}' <<<"$_msg"
 	else
-		error "Message receiving failed" "transport=ssb" "feed=$_feedId" "asset=$_assetPair"
+		error "Message receiving failed" "transport=ssb-rpc" "feed=$_feedId" "asset=$_assetPair"
 		exit 1
 	fi
 }
@@ -69,11 +73,15 @@ publishMsg() {
 	local _msg="$1"
 	local _feedId;_feedId=$(getMyId)
 	local _assetPair;_assetPair=$(jq -r .type <<<"$_msg")
+	# TODO: move rate limiting (isntStale) to the RPC client - just like spire - for consistency
 	if isntStale "$(pullLatestFeedMsgOfType "$_feedId" "$_assetPair")" "$_msg"
 	then
-		verbose "SKIPPING - last message is NOT stale." "transport=ssb" "feed=$_feedId" "asset=$_assetPair"
+		verbose "SKIPPING - last message is NOT stale." "transport=ssb-rpc" "feed=$_feedId" "asset=$_assetPair"
 	else
-		ssb-server publish . <<<"$_msg" | jq -c .
+		ssb-rpc-client \
+			--keys "$SSB_KEYS" --caps "$SSB_CONFIG" \
+			--host "$SSB_HOST" --port "$SSB_PORT" \
+			push "$_msg" | jq -c .
 	fi
 }
 

@@ -1,7 +1,6 @@
-{ stdenv, makeWrapper, runCommand, lib, glibcLocales, coreutils, bash, parallel, bc, jq, gnused, datamash, gnugrep, curl
+{ stdenv, makeWrapper, symlinkJoin, lib, glibcLocales, coreutils, bash, parallel, bc, jq, gnused, datamash, gnugrep, curl
 , ethsign, seth, setzer-mcd, stark-cli
 , ssb-server, oracle-suite }:
-
 stdenv.mkDerivation rec {
   name = "omnia-${version}";
   version = lib.fileContents ./version;
@@ -18,7 +17,7 @@ stdenv.mkDerivation rec {
 
   doCheck = true;
   checkPhase = ''
-    find . -name '*_test*' -or -path "*/test/*.sh" | while read -r x; do
+    find ./test -name '*_test*' -or -path "*/test/*.sh" -executable | while read -r x; do
       patchShebangs "$x"
       PATH="./exec:$PATH" $x
     done
@@ -50,10 +49,10 @@ stdenv.mkDerivation rec {
     done
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Omnia is a Feed and Relay Oracle client";
     homepage = "https://github.com/chronicleprotocol/omnia";
-    license = licenses.gpl3;
+    license = lib.licenses.gpl3;
     inherit version;
   };
 }
