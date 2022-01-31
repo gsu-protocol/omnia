@@ -105,70 +105,40 @@ ok 5 - ETH_GAS_PRIORITY should have value: slow > match ^fast
 
 ### Running E2E Tests
 
-For running E2E tests we need whole environment up and running, so Docker is your choise:
-Our Dev/Test environment is described in `docker-compose.yml` file.
-Our E2E Tests runners are into `.github/docker-compose-e2e-tests.yml` file.
-
-To run everything as one command you can use:
+For E2E tests you need Docker to be installed and some basic predefined tools.
+We use `smocker` for mocking Exchange API requests/responses and you need to run it first.
 
 ```bash
-$ docker-compose -f docker-compose.yml -f .github/docker-compose-e2e-tests.yml run --rm omnia_e2e_tests
+$ docker run -d \
+  --restart=always \
+  -p 8080:8080 \
+  -p 8081:8081 \
+  --name smocker \
+  thiht/smocker 
 ```
 
-NOTE: to be able to operate correctly we have to wait env to be started, so we added initial 61 seconds delay before running tests. 
-Example output will be:
+After that you will be able to run E2E tests into Docker container.
+
+But first you have to build this container:
+```bash
+$ docker build -t omnia_e2e -f test/e2e/Dockerfile .
+```
+
+And run tests:
 
 ```bash
-Creating spire_relay.local  ... done
-Creating geth.local        ... done
-Creating spire_feed.local  ... done
-Creating omnia_omnia_feed_1  ... done
-Creating omnia_omnia_relay_1 ... done
-Creating omnia_omnia_e2e_tests_run ... done
-======================================
-Starting E2E Omnia tests
-Start delay: 61 seconds
-======================================
-======================================
-Running E2E: /home/omnia/test/e2e/omnia_feed_spire.sh
-======================================
-TAP version 13
-ok 1 - run > run_json spire pull -c /home/omnia/spire.json price BTCUSD 0xfadad77b3a7e5a84a1f7ded081e785585d4ffaf3
-ok 2 - price.wat is equal to BTCUSD > json .price.wat
-1..2
-# Success, ran 2 tests!
+$ docker run --rm -it -v "$(pwd)"/test/e2e:/home/omnia/test/e2e omnia_e2e
 ```
 
-If you have whole your env up and running for some time you don't need to wait initial timeout and you can set `E2E_START_DELAY=0` env variable for `omnia_e2e_tests` using `-e KEY=VAL` property.
-
-Let's say you have your environment up and running: 
+Or if you have repeated runs, you might use container in interactive mode:
 
 ```bash
-$ docker-compose up -d
+$ docker run --rm -it -v "$(pwd)"/test/e2e:/home/omnia/test/e2e omnia_e2e /bin/bash
 ```
 
-Now you can run E2E tests container without waiting
+And run tests command:
 
 ```bash
-$ docker-compose -f docker-compose.yml -f .github/docker-compose-e2e-tests.yml run -e E2E_START_DELAY=0 --rm omnia_e2e_tests
-
-Creating omnia_omnia_e2e_tests_run ... done
-======================================
-Starting E2E Omnia tests
-Start delay: 0 seconds
-======================================
-======================================
-Running E2E: /home/omnia/test/e2e/omnia_feed_spire.sh
-======================================
-TAP version 13
-ok 1 - run > run_json spire pull -c /home/omnia/spire.json price BTCUSD 0xfadad77b3a7e5a84a1f7ded081e785585d4ffaf3
-ok 2 - price.wat is equal to BTCUSD > json .price.wat
-1..2
-# Success, ran 2 tests!
+$ go test -v -parallel 1 -cpu 1
 ```
 
-NOTE: You will have to stop your local environment after tests runing:
-
-```bash
-$ docker-compose stop
-```
