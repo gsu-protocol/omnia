@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -30,6 +31,12 @@ func NewTransport() (*Transport, error) {
 	filePath, ok := os.LookupEnv("OMNIA_TRANSPORT_E2E_FILE")
 	if !ok || filePath == "" {
 		return nil, fmt.Errorf("OMNIA_TRANSPORT_E2E_FILE is not set")
+	}
+
+	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
+		if _, fErr := os.Create(filePath); fErr != nil {
+			return nil, fmt.Errorf("failed to create transport file: %w", fErr)
+		}
 	}
 
 	err := os.Truncate(filePath, 0)
