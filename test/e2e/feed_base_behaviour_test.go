@@ -184,7 +184,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 
 	s.Require().NoError(err)
 
-	msg, err = s.transport.WaitMsg(5 * time.Second)
+	msg, err = s.transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
 
 	err = json.Unmarshal([]byte(msg), &price)
@@ -217,7 +217,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 
 	s.Require().NoError(err)
 
-	msg, err = s.transport.WaitMsg(60 * time.Second)
+	msg, err = s.transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
 
 	err = json.Unmarshal([]byte(msg), &price)
