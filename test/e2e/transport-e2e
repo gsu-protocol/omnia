@@ -2,6 +2,9 @@
 set -eo pipefail
 if [[ -n $OMNIA_DEBUG ]]; then set -x; fi
 
+# Binding new transport file for e2e transport or creating new one if it doesn't exist.
+OMNIA_TRANSPORT_E2E_FILE=${OMNIA_TRANSPORT_E2E_FILE:-$(mktemp)}
+
 _command="$1"
 case "$_command" in
 	publish)
@@ -20,7 +23,8 @@ case "$_command" in
 			},
 			trace: .sources
 		}' <<<"$2")
-#		spire push -c "$SPIRE_CONFIG" price <<<"$_msg"
+
+		echo $_msg >> "$OMNIA_TRANSPORT_E2E_FILE"
 		;;
 	pull)
 		_assetPair="$3"

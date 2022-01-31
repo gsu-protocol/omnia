@@ -8,16 +8,20 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/chronicleprotocol/infestor/smocker"
 	"github.com/stretchr/testify/suite"
 )
 
+const OmniaDefaultTimeout = 10 * time.Second
+
 type SmockerAPISuite struct {
 	suite.Suite
-	api   smocker.API
-	url   string
-	omnia *OmniaProcess
+	api       smocker.API
+	url       string
+	omnia     *OmniaProcess
+	transport *Transport
 }
 
 func (s *SmockerAPISuite) Setup() {
@@ -30,18 +34,25 @@ func (s *SmockerAPISuite) Setup() {
 	}
 
 	s.url = fmt.Sprintf("%s:8080", smockerHost)
-
-	s.omnia = NewOmniaProcess()
 }
 
 func (s *SmockerAPISuite) Reset() {
 	err := s.api.Reset(context.Background())
 	s.Require().NoError(err)
+
+	s.Require().Nil(s.transport)
+	s.transport, err = NewTransport()
+	s.Require().NoError(err)
 }
 
 func (s *SmockerAPISuite) Stop() {
-	err := s.omnia.Stop()
-	s.Require().NoError(err)
+	if s.omnia != nil {
+		_ = s.omnia.Stop()
+	}
+	if s.transport != nil {
+		_ = s.transport.Close()
+		s.transport = nil
+	}
 }
 
 func (s *SmockerAPISuite) SetupSuite() {
@@ -63,10 +74,10 @@ type OmniaProcess struct {
 	Stderr  *bytes.Buffer
 }
 
-func NewOmniaProcess(params ...string) *OmniaProcess {
+func NewOmniaProcess(ctx context.Context, params ...string) *OmniaProcess {
 	var outb, errb bytes.Buffer
 
-	cmd := exec.Command("omnia", params...)
+	cmd := exec.CommandContext(ctx, "omnia", params...)
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
 
@@ -88,6 +99,25 @@ func (op *OmniaProcess) StderrString() string {
 func (op *OmniaProcess) Start() error {
 	op.cmd.Env = os.Environ()
 	return op.cmd.Start()
+}
+
+func (op *OmniaProcess) WaitExit() (int, error) {
+	if op.cmd == nil {
+		return 0, fmt.Errorf("failed to wait for non existing command")
+	}
+	err := op.cmd.Wait()
+	if err == nil {
+		return 0, nil
+	}
+	if werr, ok := err.(*exec.ExitError); ok {
+		if s := werr.Error(); s != "0" {
+			if status, ok := werr.Sys().(syscall.WaitStatus); ok {
+				return status.ExitStatus(), nil
+			}
+			return 1, nil
+		}
+	}
+	return 0, fmt.Errorf("failed to get exit status core")
 }
 
 func (op *OmniaProcess) Stop() error {

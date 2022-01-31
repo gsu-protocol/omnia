@@ -42,8 +42,10 @@ ENV ORIGIN_THEGRAPH_URL=$SMOCKER \
 # Omnia configuration
 ENV OMNIA_INTERVAL=1 \
     OMNIA_MODE="FEED" \
-    OMNIA_CONFIG="/app/test/e2e/config/feed.conf"
+    OMNIA_CONFIG="/app/test/e2e/config/feed.conf" \
+    OMNIA_TRANSPORT_E2E_FILE="/app/test/e2e/transport.log"
 
+COPY ./test/e2e/transport-e2e /home/omnia/exec
 # Copy sources
 COPY . /app
 
