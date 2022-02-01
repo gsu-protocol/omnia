@@ -1,5 +1,5 @@
 importEnv () {
-	local _here=$(cd "${BASH_SOURCE[0]%/*}" && pwd)
+	local _here;_here=$(cd "${BASH_SOURCE[0]%/*}" && pwd)
 	local config
 	if [[ -f "$OMNIA_CONFIG" ]]; then
 		config="$OMNIA_CONFIG"
@@ -24,7 +24,6 @@ importEnv () {
 	importStarkwareEnv "$config"
 	importAssetPairsEnv "$config"
 	importOptionsEnv "$config"
-	importScuttlebotEnv || true
 	importServicesEnv "$config"
 
 	if [[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]]; then
@@ -126,16 +125,6 @@ importEthereumEnv () {
 	[[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && importGasPrice "$_json"
 
 	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
-}
-
-#sign message
-signMessage () {
-	local _data
-	for arg in "$@"; do
-		_data+="$arg"
-	done
-	verbose "Signing message..."
-	ethsign message --from "$ETH_FROM" --key-store "$ETH_KEYSTORE" --passphrase-file "$ETH_PASSWORD" --data "$_data"
 }
 
 importStarkwareEnv() {
@@ -296,10 +285,4 @@ importServicesEnv () {
 	export SSB_ID_MAP
 
 	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
-}
-
-importScuttlebotEnv() {
-	SCUTTLEBOT_FEED_ID=$(getFeedId)
-	[[ $SCUTTLEBOT_FEED_ID ]] || { error "Could not get scuttlebot feed id, make sure scuttlebot server is running"; return 1; }
-	export SCUTTLEBOT_FEED_ID
 }
