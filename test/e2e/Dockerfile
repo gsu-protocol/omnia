@@ -1,4 +1,6 @@
-FROM ghcr.io/chronicleprotocol/omnia_dev:latest
+FROM ghcr.io/chronicleprotocol/omnia:dev
+
+USER root
 
 # Installing go
 RUN apk add --no-cache make musl-dev go
@@ -45,7 +47,7 @@ ENV OMNIA_INTERVAL=1 \
     OMNIA_CONFIG="/app/test/e2e/config/feed.conf" \
     OMNIA_TRANSPORT_E2E_FILE="/app/test/e2e/transport.log"
 
-COPY ./test/e2e/transport-e2e /home/omnia/exec
+COPY ./test/e2e/transport-e2e /opt/omnia/exec
 # Copy sources
 COPY . /app
 

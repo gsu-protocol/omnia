@@ -39,10 +39,12 @@ RUN apk add --update --no-cache \
 COPY --from=go-builder /go/src/dapptools/src/dapp/ /opt/dapp/
 COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
 
-ARG SETZER_BRANCH="v0.4.0"
-RUN git clone --depth 1 --branch ${SETZER_BRANCH} https://github.com/makerdao/setzer-mcd.git \
-  && cp -R setzer-mcd /opt/setzer \
-  && rm -rf setzer-mcd
+ARG SETZER_REF="b9ddabde9bba61d29a3694ba15b657e36c84b3e7"
+RUN wget https://github.com/makerdao/setzer-mcd/archive/${SETZER_REF}.zip \
+   && unzip ${SETZER_REF}.zip \
+   && cp -R setzer-mcd-${SETZER_REF}/ /opt/setzer \
+   && rm -rf setzer-mcd-${SETZER_REF} \
+   && rm ${SETZER_REF}.zip
 
 COPY --from=go-builder \
   /go/src/dapptools/src/ethsign/ethsign \
