@@ -42,11 +42,12 @@ func (s *FeedBaseBehaviourE2ESuite) TestPartialInvalidPricesLessThanMin() {
 	err = s.omnia.Start()
 	fmt.Println(s.omnia.StdoutString())
 
-	code, err := s.omnia.WaitExit()
+	err = s.omnia.Stop()
 	s.Assert().NoError(err)
-	s.Assert().Equal(1, code)
 
-	s.Assert().True(s.transport.IsEmpty())
+	empty, err := s.transport.IsEmpty()
+	s.Assert().NoError(err)
+	s.Assert().True(empty, "E2E Transport send message, but should not")
 }
 
 func (s *FeedBaseBehaviourE2ESuite) TestAllInvalidPrices() {
@@ -98,8 +99,9 @@ func (s *FeedBaseBehaviourE2ESuite) TestMinValuablePrices() {
 	s.Require().NoError(err)
 	s.Require().NotNil(ch)
 
-	// TODO: add timeout
-	msg := <-ch
+	msg, err := s.transport.WaitMsg(15 * time.Second)
+	s.Require().NoError(err)
+
 	var price PriceMessage
 
 	err = json.Unmarshal([]byte(msg), &price)
