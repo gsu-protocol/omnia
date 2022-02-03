@@ -54,10 +54,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: PreBuild Base Omnia images (Remove after PR merge)
-        run: docker build -t ghcr.io/chronicleprotocol/base:latest -f docker/base/Dockerfile .
       - name: PreBuild Omnia images (Remove after PR merge)
-        run: docker build -t ghcr.io/chronicleprotocol/omnia_dev:latest -f docker/omnia/Dockerfile .
+        run: docker build -t ghcr.io/chronicleprotocol/omnia:dev -f Dockerfile .
       - name: Start Smocker instance for testing
         run: docker run -d -p 8080:8080 -p 8081:8081 --name smocker thiht/smocker
       - name: Build E2E Tests in Docker
