@@ -28,6 +28,9 @@ RUN go mod tidy && \
 #FROM python:3.9.10-alpine3.14 # same
 FROM python:3.9.9-alpine3.15
 
+ARG DAPP_BRANCH="dapp/0.34.1"
+ARG SETZER_REF="b9ddabde9bba61d29a3694ba15b657e36c84b3e7"
+
 RUN apk add --update --no-cache \
   jq curl git make perl g++ ca-certificates parallel tree \
   bash bash-doc bash-completion \
@@ -36,13 +39,18 @@ RUN apk add --update --no-cache \
   && apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
   jshon agrep datamash
 
+# Installing setzer
+RUN wget https://github.com/makerdao/setzer-mcd/archive/${SETZER_REF}.zip \
+  && unzip ${SETZER_REF}.zip \
+  && cp -R setzer-mcd-${SETZER_REF}/libexec/setzer/ /root/setzer \
+  && rm -rf setzer-mcd-${SETZER_REF} \
+  && rm ${SETZER_REF}.zip
+
+COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
+COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc \
+
 COPY --from=go-builder /go/src/dapptools/src/dapp/ /opt/dapp/
 COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
-
-ARG SETZER_BRANCH="v0.4.0"
-RUN git clone --depth 1 --branch ${SETZER_BRANCH} https://github.com/makerdao/setzer-mcd.git \
-  && cp -R setzer-mcd /opt/setzer \
-  && rm -rf setzer-mcd
 
 COPY --from=go-builder \
   /go/src/dapptools/src/ethsign/ethsign \
@@ -50,9 +58,6 @@ COPY --from=go-builder \
   /go/src/oracle-suite/gofer \
   /go/src/oracle-suite/ssb-rpc-client \
   /usr/local/bin/
-
-COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
-COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc
 
 RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
 
