@@ -1,4 +1,4 @@
-package e2e
+package feeder
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"testing"
 	"time"
+
+	e2e "github.com/makerdao/setzer-e2e"
 
 	"github.com/chronicleprotocol/infestor"
 	"github.com/chronicleprotocol/infestor/origin"
@@ -18,14 +20,14 @@ func TestFeedBaseBehaviourE2ESuite(t *testing.T) {
 }
 
 type FeedBaseBehaviourE2ESuite struct {
-	SmockerAPISuite
+	e2e.SmockerAPISuite
 }
 
 func (s *FeedBaseBehaviourE2ESuite) TestPartialInvalidPricesLessThanMin() {
-	ctx, cancel := context.WithTimeout(context.Background(), OmniaDefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), e2e.OmniaDefaultTimeout)
 	defer cancel()
 
-	s.omnia = NewOmniaProcess(ctx)
+	s.Omnia = e2e.NewOmniaFeedProcess(ctx)
 
 	// Setup price for BTC/USD
 	err := infestor.NewMocksBuilder().
@@ -35,26 +37,26 @@ func (s *FeedBaseBehaviourE2ESuite) TestPartialInvalidPricesLessThanMin() {
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("kraken").WithSymbol("XXBT/ZUSD").WithStatusCode(http.StatusConflict)).
-		Deploy(s.api)
+		Deploy(s.API)
 
 	s.Require().NoError(err)
 
-	err = s.omnia.Start()
-	fmt.Println(s.omnia.StdoutString())
+	err = s.Omnia.Start()
+	fmt.Println(s.Omnia.StdoutString())
 
-	err = s.omnia.Stop()
+	err = s.Omnia.Stop()
 	s.Assert().NoError(err)
 
-	empty, err := s.transport.IsEmpty()
+	empty, err := s.Transport.IsEmpty()
 	s.Assert().NoError(err)
 	s.Assert().True(empty, "E2E Transport send message, but should not")
 }
 
 func (s *FeedBaseBehaviourE2ESuite) TestAllInvalidPrices() {
-	ctx, cancel := context.WithTimeout(context.Background(), OmniaDefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), e2e.OmniaDefaultTimeout)
 	defer cancel()
 
-	s.omnia = NewOmniaProcess(ctx)
+	s.Omnia = e2e.NewOmniaFeedProcess(ctx)
 
 	// Setup price for BTC/USD
 	err := infestor.NewMocksBuilder().
@@ -64,21 +66,21 @@ func (s *FeedBaseBehaviourE2ESuite) TestAllInvalidPrices() {
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("kraken").WithSymbol("XXBT/ZUSD").WithStatusCode(http.StatusConflict)).
-		Deploy(s.api)
+		Deploy(s.API)
 
 	s.Require().NoError(err)
 
-	err = s.omnia.Start()
-	fmt.Println(s.omnia.StdoutString())
+	err = s.Omnia.Start()
+	fmt.Println(s.Omnia.StdoutString())
 
-	s.Assert().True(s.transport.IsEmpty())
+	s.Assert().True(s.Transport.IsEmpty())
 }
 
 func (s *FeedBaseBehaviourE2ESuite) TestMinValuablePrices() {
-	ctx, cancel := context.WithTimeout(context.Background(), OmniaDefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), e2e.OmniaDefaultTimeout)
 	defer cancel()
 
-	s.omnia = NewOmniaProcess(ctx)
+	s.Omnia = e2e.NewOmniaFeedProcess(ctx)
 
 	// Setup price for BTC/USD
 	err := infestor.NewMocksBuilder().
@@ -88,21 +90,21 @@ func (s *FeedBaseBehaviourE2ESuite) TestMinValuablePrices() {
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(1)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("kraken").WithSymbol("XXBT/ZUSD").WithStatusCode(http.StatusConflict)).
-		Deploy(s.api)
+		Deploy(s.API)
 
 	s.Require().NoError(err)
 
-	err = s.omnia.Start()
-	fmt.Println(s.omnia.StdoutString())
+	err = s.Omnia.Start()
+	fmt.Println(s.Omnia.StdoutString())
 
-	ch, err := s.transport.ReadChan()
+	ch, err := s.Transport.ReadChan()
 	s.Require().NoError(err)
 	s.Require().NotNil(ch)
 
-	msg, err := s.transport.WaitMsg(15 * time.Second)
+	msg, err := s.Transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
 
-	var price PriceMessage
+	var price e2e.PriceMessage
 
 	err = json.Unmarshal([]byte(msg), &price)
 	s.Require().NoError(err)
@@ -130,7 +132,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	s.omnia = NewOmniaProcess(ctx)
+	s.Omnia = e2e.NewOmniaFeedProcess(ctx)
 
 	// Setup price for BTC/USD
 	err := infestor.NewMocksBuilder().
@@ -140,21 +142,21 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(1)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithPrice(1)).
 		Add(origin.NewExchange("kraken").WithSymbol("XXBT/ZUSD").WithPrice(1)).
-		Deploy(s.api)
+		Deploy(s.API)
 
 	s.Require().NoError(err)
 
-	err = s.omnia.Start()
+	err = s.Omnia.Start()
 	s.Require().NoError(err)
 
-	ch, err := s.transport.ReadChan()
+	ch, err := s.Transport.ReadChan()
 	s.Require().NoError(err)
 	s.Require().NotNil(ch)
 
-	msg, err := s.transport.WaitMsg(15 * time.Second)
+	msg, err := s.Transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
 
-	var price PriceMessage
+	var price e2e.PriceMessage
 
 	err = json.Unmarshal([]byte(msg), &price)
 	s.Require().NoError(err)
@@ -182,11 +184,11 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(2)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithPrice(2)).
 		Add(origin.NewExchange("kraken").WithSymbol("XXBT/ZUSD").WithPrice(2)).
-		Deploy(s.api)
+		Deploy(s.API)
 
 	s.Require().NoError(err)
 
-	msg, err = s.transport.WaitMsg(15 * time.Second)
+	msg, err = s.Transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
 
 	err = json.Unmarshal([]byte(msg), &price)
@@ -215,11 +217,11 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(3)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithPrice(3)).
 		Add(origin.NewExchange("kraken").WithSymbol("XXBT/ZUSD").WithPrice(3)).
-		Deploy(s.api)
+		Deploy(s.API)
 
 	s.Require().NoError(err)
 
-	msg, err = s.transport.WaitMsg(15 * time.Second)
+	msg, err = s.Transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
 
 	err = json.Unmarshal([]byte(msg), &price)

@@ -106,39 +106,22 @@ ok 5 - ETH_GAS_PRIORITY should have value: slow > match ^fast
 ### Running E2E Tests
 
 For E2E tests you need Docker to be installed and some basic predefined tools.
-We use `smocker` for mocking Exchange API requests/responses and you need to run it first.
+We use `smocker` for mocking Exchange API requests/responses and local `geth` for omnia relayer tests.
+To setup environment you can use this command:
 
 ```bash
-$ docker run -d \
-  --restart=always \
-  -p 8080:8080 \
-  -p 8081:8081 \
-  --name smocker \
-  thiht/smocker 
+$ docker-compose -f .github/docker-compose-e2e.yml run omnia_e2e 
 ```
 
-After that you will be able to run E2E tests into Docker container.
+### E2E Tests Development
 
-But first you have to build this container:
-```bash
-$ docker build -t omnia_e2e -f test/e2e/Dockerfile .
-```
+For tests development process we created additional image `omnia_e2e_dev`.
 
-And run tests:
+Run it:
 
 ```bash
-$ docker run --rm -it -v "$(pwd)"/test/e2e:/home/omnia/test/e2e omnia_e2e
+$ docker-compose -f .github/docker-compose-e2e.yml run --rm omnia_e2e_dev
 ```
 
-Or if you have repeated runs, you might use container in interactive mode:
-
-```bash
-$ docker run --rm -it -v "$(pwd)"/test/e2e:/home/omnia/test/e2e omnia_e2e /bin/bash
-```
-
-And run tests command:
-
-```bash
-$ go test -v -parallel 1 -cpu 1
-```
+It will start `bash` session inside omnia dev container with mounted folders.
 

@@ -18,17 +18,20 @@ const OmniaDefaultTimeout = 10 * time.Second
 
 type SmockerAPISuite struct {
 	suite.Suite
-	api       smocker.API
 	url       string
-	omnia     *OmniaProcess
-	transport *Transport
+	Ctx       context.Context
+	API       smocker.API
+	Omnia     *OmniaProcess
+	Transport *Transport
 }
 
 func (s *SmockerAPISuite) Setup() {
 	smockerHost, exist := os.LookupEnv("SMOCKER_HOST")
 	s.Require().True(exist, "SMOCKER_HOST env variable have to be set")
 
-	s.api = smocker.API{
+	s.Ctx = context.Background()
+
+	s.API = smocker.API{
 		Host: smockerHost,
 		Port: 8081,
 	}
@@ -37,21 +40,21 @@ func (s *SmockerAPISuite) Setup() {
 }
 
 func (s *SmockerAPISuite) Reset() {
-	err := s.api.Reset(context.Background())
+	err := s.API.Reset(context.Background())
 	s.Require().NoError(err)
 
-	s.Require().Nil(s.transport)
-	s.transport, err = NewTransport()
+	s.Require().Nil(s.Transport)
+	s.Transport, err = NewTransport()
 	s.Require().NoError(err)
 }
 
 func (s *SmockerAPISuite) Stop() {
-	if s.omnia != nil {
-		_ = s.omnia.Stop()
+	if s.Omnia != nil {
+		_ = s.Omnia.Stop()
 	}
-	if s.transport != nil {
-		_ = s.transport.Close()
-		s.transport = nil
+	if s.Transport != nil {
+		_ = s.Transport.Close()
+		s.Transport = nil
 	}
 }
 
@@ -74,12 +77,28 @@ type OmniaProcess struct {
 	Stderr  *bytes.Buffer
 }
 
-func NewOmniaProcess(ctx context.Context, params ...string) *OmniaProcess {
+func NewOmniaFeedProcess(ctx context.Context, params ...string) *OmniaProcess {
 	var outb, errb bytes.Buffer
 
 	cmd := exec.CommandContext(ctx, "omnia", params...)
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
+	cmd.Env = os.Environ()
+
+	return &OmniaProcess{
+		cmd:    cmd,
+		Stdout: &outb,
+		Stderr: &errb,
+	}
+}
+
+func NewOmniaRelayProcess(ctx context.Context, params ...string) *OmniaProcess {
+	var outb, errb bytes.Buffer
+
+	cmd := exec.CommandContext(ctx, "omnia", params...)
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
+	cmd.Env = append(os.Environ(), "OMNIA_MODE=RELAYER", "OMNIA_CONFIG=/app/test/e2e/config/relay.conf")
 
 	return &OmniaProcess{
 		cmd:    cmd,
@@ -97,7 +116,6 @@ func (op *OmniaProcess) StderrString() string {
 }
 
 func (op *OmniaProcess) Start() error {
-	op.cmd.Env = os.Environ()
 	return op.cmd.Start()
 }
 
@@ -125,6 +143,30 @@ func (op *OmniaProcess) Stop() error {
 		return nil
 	}
 	return op.cmd.Process.Kill()
+}
+
+func SignMessage(pair, price string) (string, error) {
+	out, err := exec.Command("sign-message", pair, price).Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
+func ToWei(amount float64) (string, error) {
+	out, err := exec.Command("ethereum", "--to-wei", fmt.Sprintf("%f", amount), "eth").Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
+func ToHex(str string) (string, error) {
+	out, err := exec.Command("ethereum", "--to-uint256", str).Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.Replace(strings.TrimSpace(string(out)), "0x", "", 1), nil
 }
 
 func call(command string, params ...string) (string, int, error) {

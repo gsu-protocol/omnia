@@ -10,7 +10,7 @@ ENV GOROOT="/usr/lib/go" \
     PATH="/go/bin:$PATH"
 
 # TMP
-ENV SMOCKER_HOST="http://smocker"
+ENV SMOCKER_HOST="http://smocker.local"
 ENV SMOCKER="${SMOCKER_HOST}:8080"
 
 # setting setzer configs
@@ -47,7 +47,10 @@ ENV OMNIA_INTERVAL=1 \
     OMNIA_CONFIG="/app/test/e2e/config/feed.conf" \
     OMNIA_TRANSPORT_E2E_FILE="/app/test/e2e/transport.log"
 
-COPY ./test/e2e/transport-e2e /opt/omnia/exec
+ENV GETH_RPC_URL="http://geth.local:8545"
+
+COPY ./test/e2e/bin/transport-e2e /opt/omnia/exec
+COPY ./test/e2e/bin/sign-message /opt/omnia/exec
 # Copy sources
 COPY . /app
 

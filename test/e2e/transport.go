@@ -9,16 +9,33 @@ import (
 	"github.com/hpcloud/tail"
 )
 
+type PriceValue struct {
+	Wat string
+	Val string
+	Age int64
+	R   string
+	S   string
+	V   string
+}
 type PriceMessage struct {
-	Price struct {
-		Wat string
-		Val string
-		Age int64
-		R   string
-		S   string
-		V   string
-	}
+	Price PriceValue
 	Trace map[string]string
+}
+
+func NewPriceMessage(pair, price string) *PriceMessage {
+	return &PriceMessage{
+		Price: PriceValue{
+			Wat: pair,
+			Val: price,
+			Age: time.Now().Unix(),
+			R:   "0",
+			S:   "0",
+			V:   "0",
+		},
+		Trace: map[string]string{
+			"source": "test",
+		},
+	}
 }
 
 type Transport struct {
@@ -110,4 +127,22 @@ func (t *Transport) WaitMsg(timeout time.Duration) (string, error) {
 	case <-time.After(timeout):
 		return "", fmt.Errorf("timeout waiting for message")
 	}
+}
+
+func (t *Transport) Truncate() error {
+	if t.filePath == "" {
+		return fmt.Errorf("Truncate: file path is not set")
+	}
+	return os.Truncate(t.filePath, 0)
+}
+
+func (t *Transport) WriteMsg(msg []byte) error {
+	if t.filePath == "" {
+		return fmt.Errorf("WriteMsg: file path is not set")
+	}
+	err := os.WriteFile(t.filePath, msg, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	return nil
 }
