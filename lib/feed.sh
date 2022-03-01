@@ -177,7 +177,7 @@ validateAndConstructMessage() {
 		return 1
 	fi
 
-  #Sign hash
+	#Sign hash
 	sig=$(signMessage "$hash")
 	if [[ ! "$sig" =~ ^(0x){1}[0-9a-f]{130}$ ]]; then
 		error "Error - Failed to generate valid signature"

@@ -35,6 +35,8 @@ jobs:
     needs: unit-test
     runs-on: ubuntu-latest
 
+    env:
+      COMPOSE_FILE: .github/docker-compose-e2e-tests.yml
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -57,8 +59,8 @@ jobs:
       - name: PreBuild Omnia images (Remove after PR merge)
         run: docker build -t ghcr.io/chronicleprotocol/omnia:dev -f Dockerfile .
       - name: Building Omnia e2e image
-        run: docker-compose -f .github/docker-compose-e2e-tests.yml build omnia_e2e
+        run: docker-compose -f $COMPOSE_FILE build omnia_e2e
       - name: Running Omnia Feed E2E tests
-        run: docker-compose -f .github/docker-compose-e2e-tests.yml run --rm omnia_e2e go test -v -parallel 1 -cpu 1 ./feeder
+        run: docker-compose -f $COMPOSE_FILE run --rm omnia_e2e go test -v -parallel 1 -cpu 1 ./feeder
       - name: Running Omnia Relayer E2E tests
-        run: docker-compose -f .github/docker-compose-e2e-tests.yml run --rm omnia_e2e go test -v -parallel 1 -cpu 1 ./relayer
+        run: docker-compose -f $COMPOSE_FILE run --rm omnia_e2e go test -v -parallel 1 -cpu 1 ./relayer

@@ -10,7 +10,7 @@ _mapSetzer() {
 			'{($s):$p}'
 	else
 #		error "Failed to get asset price" "asset=$_assetPair" "source=$_source"
-    echo "[$(date "+%D %T")] [E] Failed to get $_assetPair price from $_source is $_price" >&2
+		echo "[$(date "+%D %T")] [E] Failed to get $_assetPair price from $_source is $_price" >&2
 	fi
 }
 export -f _mapSetzer

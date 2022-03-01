@@ -1,9 +1,10 @@
 version: '3'
 services:
   omnia_unit_tests:
-    image: ghcr.io/chronicleprotocol/omnia_dev:latest
+    image: ghcr.io/chronicleprotocol/omnia:dev
     volumes:
-      - "../lib:/home/omnia/lib"
+      - "../exec:/opt/omnia/exec"
+      - "../lib:/opt/omnia/lib"
       - "../test:/home/omnia/test"
       - "../docker/omnia/config/feed.json:/home/omnia/config.json"
       - "../docker/spire/config/client_feed.json:/home/omnia/spire.json"
