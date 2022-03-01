@@ -4,7 +4,7 @@ services:
     image: ghcr.io/chronicleprotocol/omnia:dev
     volumes:
       - "../exec:/opt/omnia/exec"
-      - "../lib:/opt/omnia/lib"
+      - "../lib:/home/omnia/lib"
       - "../test:/home/omnia/test"
       - "../docker/omnia/config/feed.json:/home/omnia/config.json"
       - "../docker/spire/config/client_feed.json:/home/omnia/spire.json"

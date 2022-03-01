@@ -42,7 +42,7 @@ export ETH_PASSWORD="$TEST_PATH/../../tests/resources/password"
 currentTime=$(timestamp 0)
 
 export PATH="${0%/*/*}/exec:${PATH}"
-transport-ssb pull f33d1d BTC/USD > $wdir/output
+transport-ssb pull @f33d1d BTC/USD > $wdir/output
 assert "pulled price message" json '.type' <<<'"BTCUSD"'
 
 echo '{}' > $wdir/output

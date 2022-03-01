@@ -27,6 +27,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: PreBuild Omnia images (Remove after PR merge)
+        run: docker build -t ghcr.io/chronicleprotocol/omnia:dev -f Dockerfile .
       - name: Run Unit Tests
         run: docker-compose -f $COMPOSE_FILE run --rm omnia_unit_tests
 
