@@ -7,7 +7,7 @@ OMNIA_TRANSPORT_E2E_FILE=${OMNIA_TRANSPORT_E2E_FILE:-$(mktemp)}
 
 _command="$1"
 case "$_command" in
-	publish)
+	push|publish)
 		_val=$(seth --to-wei "$(jq -r '.price' <<<"$2")" eth)
 		_msg=$(jq --arg val "$_val" -c '{
 			price: {
