@@ -1,79 +1,60 @@
 FROM golang:1.17-alpine3.15 as go-builder
-
-ARG DAPP_BRANCH="dapp/0.34.1"
-
 RUN apk --no-cache add git
 
-WORKDIR /go/src/ethsign
+ARG CGO_ENABLED=0
 
-RUN git clone -b ${DAPP_BRANCH} https://github.com/dapphub/dapptools.git .
+ARG DAPP_BRANCH="master"
 
-RUN export CGO_ENABLED=0 \
-  && mkdir dist \
-  && cd src/ethsign/ \
-  && go mod tidy \
-  && go mod download \
-  && go build -o ../../dist/ethsign ./ethsign.go
+WORKDIR /go/src/dapptools
+RUN git clone --depth 1 --branch ${DAPP_BRANCH} https://github.com/dapphub/dapptools.git .
 
-FROM python:3.10.2-alpine3.15
+WORKDIR /go/src/dapptools/src/ethsign
+RUN go mod tidy && \
+  go mod download && \
+  go build .
+
+ARG ORACLE_SUITE_BRANCH="v0.3.5"
+
+WORKDIR /go/src/oracle-suite
+RUN git clone --depth 1 --branch ${ORACLE_SUITE_BRANCH} https://github.com/chronicleprotocol/oracle-suite.git .
+
+RUN go mod tidy && \
+  go mod download && \
+  go build ./cmd/spire && \
+  go build ./cmd/gofer && \
+  go build ./cmd/ssb-rpc-client
+
+#FROM python:3.10.2-alpine3.15 # failing `test -x FILE`
+#FROM python:3.9.10-alpine3.14 # same
+FROM python:3.9.9-alpine3.15
+
+RUN apk add --update --no-cache \
+  jq curl git make perl g++ ca-certificates parallel tree \
+  bash bash-doc bash-completion \
+  util-linux pciutils usbutils coreutils binutils findutils grep iproute2 \
+  nodejs \
+  && apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
+  jshon agrep datamash
+
+COPY --from=go-builder /go/src/dapptools/src/dapp/ /opt/dapp/
+COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
 
 ARG SETZER_BRANCH="v0.4.0"
-
-RUN apk add --no-cache \
-  bash jq curl git make perl g++ ca-certificates
-RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
-  jshon agrep
-
-ARG DAPP_BRANCH="dapp/0.34.1"
-
-# Downloading dapp
-RUN git clone -b ${DAPP_BRANCH} https://github.com/dapphub/dapptools.git \
-  && cp -R dapptools/src/dapp/ /opt/dapp \
-  && cp -R dapptools/src/seth/libexec/seth /opt/seth \
-  && rm -rf dapptools
-
-# Installing setzer
-RUN git clone -b ${SETZER_BRANCH} https://github.com/makerdao/setzer-mcd.git \
-  && cp -R setzer-mcd/libexec/setzer/ /opt/setzer \
+RUN git clone --depth 1 --branch ${SETZER_BRANCH} https://github.com/makerdao/setzer-mcd.git \
+  && cp -R setzer-mcd /opt/setzer \
   && rm -rf setzer-mcd
 
-COPY --from=ethsign-builder /go/src/ethsign/dist/ /usr/local/bin/
+COPY --from=go-builder \
+  /go/src/dapptools/src/ethsign/ethsign \
+  /go/src/oracle-suite/spire \
+  /go/src/oracle-suite/gofer \
+  /go/src/oracle-suite/ssb-rpc-client \
+  /usr/local/bin/
 
 COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
 COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc
 
-ARG ORACLE_SUITE_VERSION="0.3.5"
+RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
 
-# Downloading Spire from github releases
-RUN mkdir spire_dist \
-  && cd spire_dist \
-  && wget https://github.com/chronicleprotocol/oracle-suite/releases/download/v${ORACLE_SUITE_VERSION}/spire_${ORACLE_SUITE_VERSION}_linux_arm64.tar.gz \
-  && tar -xvzf spire_${ORACLE_SUITE_VERSION}_linux_arm64.tar.gz \
-  && cp spire /usr/local/bin/ \
-  && chmod +x /usr/local/bin/spire \
-  && cd .. \
-  && rm -rf spire_dist
-
-# Downloading Gofer from github releases
-RUN mkdir gofer_dist \
-  && cd gofer_dist \
-  && wget https://github.com/chronicleprotocol/oracle-suite/releases/download/v${ORACLE_SUITE_VERSION}/gofer_${ORACLE_SUITE_VERSION}_linux_arm64.tar.gz \
-  && tar -xvzf gofer_${ORACLE_SUITE_VERSION}_linux_arm64.tar.gz \
-  && cp gofer /usr/local/bin/ \
-  && chmod +x /usr/local/bin/gofer \
-  && cd .. \
-  && rm -rf gofer_dist
-  
-# Downloading SSB RPC Client from github releases
-RUN mkdir ssb-rpc-client_dist \
-  && cd ssb-rpc-client_dist \
-  && wget https://github.com/chronicleprotocol/oracle-suite/releases/download/v${ORACLE_SUITE_VERSION}/ssb-rpc-client_${ORACLE_SUITE_VERSION}_linux_arm64.tar.gz \
-  && tar -xvzf ssb-rpc-client_${ORACLE_SUITE_VERSION}_linux_arm64.tar.gz \
-  && cp ssb-rpc-client /usr/local/bin/ \
-  && chmod +x /usr/local/bin/ssb-rpc-client \
-  && cd .. \
-  && rm -rf ssb-rpc-client_dist
-
-ENV PATH="/opt/dapp/libexec/dapp:/opt/seth:/opt/setzer:${PATH}"
-
+ENV PATH="/opt/dapp/bin:/opt/seth/bin:/opt/setzer/bin:${PATH}"
 CMD ["/bin/bash"]

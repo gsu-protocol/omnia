@@ -1,5 +1,6 @@
 FROM golang:1.17-alpine3.15 as go-builder
 RUN apk --no-cache add git
+
 ARG CGO_ENABLED=0
 
 ARG DAPP_BRANCH="master"
@@ -9,8 +10,8 @@ RUN git clone --depth 1 --branch ${DAPP_BRANCH} https://github.com/dapphub/dappt
 
 WORKDIR /go/src/dapptools/src/ethsign
 RUN go mod tidy && \
-  go mod download && \
-  go build .
+    go mod download && \
+    go build .
 
 ARG ORACLE_SUITE_BRANCH="v0.3.5"
 
@@ -18,10 +19,10 @@ WORKDIR /go/src/oracle-suite
 RUN git clone --depth 1 --branch ${ORACLE_SUITE_BRANCH} https://github.com/chronicleprotocol/oracle-suite.git .
 
 RUN go mod tidy && \
-  go mod download && \
-  go build ./cmd/spire && \
-  go build ./cmd/gofer && \
-  go build ./cmd/ssb-rpc-client
+    go mod download && \
+    go build ./cmd/spire && \
+    go build ./cmd/gofer && \
+    go build ./cmd/ssb-rpc-client
 
 #FROM python:3.10.2-alpine3.15 # failing `test -x FILE`
 #FROM python:3.9.10-alpine3.14 # same
@@ -49,10 +50,13 @@ COPY --from=go-builder \
   /go/src/oracle-suite/gofer \
   /go/src/oracle-suite/ssb-rpc-client \
   /usr/local/bin/
+
 COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
 COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc
+
 RUN pip install --no-cache-dir mpmath sympy ecdsa==0.16.0
 COPY ./docker/starkware/ /opt/starkware/
+
 COPY ./bin /opt/omnia/bin/
 COPY ./exec /opt/omnia/exec/
 COPY ./lib /opt/omnia/lib/
@@ -70,16 +74,19 @@ ENV OMNIA_CONFIG ${HOME}/omnia.json \
 COPY ./config/feed.json ${OMNIA_CONFIG}
 COPY ./docker/spire/config/client_feed.json ${SPIRE_CONFIG}
 COPY ./docker/gofer/client.json ${GOFER_CONFIG}
+
 WORKDIR ${HOME}
 COPY ./docker/keystore/ .ethereum/keystore/
 COPY ./docker/ssb-server/config/manifest.json .ssb/manifest.json
 COPY ./docker/ssb-server/config/secret .ssb/secret
 COPY ./docker/ssb-server/config/config.json .ssb/config
+
 ARG USER=1000
 ARG GROUP=1000
 RUN chown -R ${USER}:${GROUP} ${HOME}
 USER ${USER}:${GROUP}
 RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
+
 # Setting up PATH for seth, setzer and omnia bin folder
 # Here we have set of different pathes included:
 # - /opt/dapp - For `dapp` executable
@@ -89,4 +96,5 @@ RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
 # - /opt/omnia/bin - Omnia executables
 # - /opt/omnia/exec - Omnia transports executables
 ENV PATH="/opt/dapp/bin:/opt/seth/bin:/opt/setzer/bin:/opt/starkware:/opt/omnia/bin:/opt/omnia/exec:${PATH}"
+
 CMD ["omnia"]
