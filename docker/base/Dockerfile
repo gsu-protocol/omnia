@@ -47,7 +47,7 @@ RUN wget https://github.com/makerdao/setzer-mcd/archive/${SETZER_REF}.zip \
   && rm ${SETZER_REF}.zip
 
 COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
-COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc \
+COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc
 
 COPY --from=go-builder /go/src/dapptools/src/dapp/ /opt/dapp/
 COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
