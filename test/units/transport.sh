@@ -1,5 +1,6 @@
 #!/bin/bash
 test_path=$(cd "${BASH_SOURCE[0]%/*}"; pwd)
+export test_path
 root_path=$(cd "$test_path/../.."; pwd)
 lib_path="$root_path/lib"
 
@@ -8,7 +9,6 @@ lib_path="$root_path/lib"
 
 . "$root_path/tap.sh" 2>/dev/null || . "$root_path/test/tap.sh"
 
-# Mock setzer
 transport-mock() {
 	case "$1" in
 		push|publish)
