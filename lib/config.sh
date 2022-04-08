@@ -50,6 +50,7 @@ importTransports () {
 	[[ "${#OMNIA_TRANSPORTS[@]}" -gt 0 ]] || OMNIA_TRANSPORTS=("transport-spire" "transport-ssb")
 }
 
+# Actual call to eth-rpc was moved to separate function because it helps to mock it in unit tests.
 getLatestBlock () {
 	echo $(ethereum --rpc-url "$1" block latest number)
 }
@@ -74,7 +75,7 @@ importNetwork () {
 			;;
 	esac
 
-	[[ $(getLatestBlock $ETH_RPC_URL) =~ ^[1-9]*[0-9]*$ ]] || errors+=("Error - Unable to connect to Ethereum network.\nValid options are: ethlive, mainnet, ropsten, kovan, rinkeby, goerli, or a custom endpoint")
+	[[ $(getLatestBlock $ETH_RPC_URL) =~ ^[1-9]{1,}[0-9]*$ ]] || errors+=("Error - Unable to connect to Ethereum network.\nValid options are: ethlive, mainnet, ropsten, kovan, rinkeby, goerli, or a custom endpoint")
 	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 	export ETH_RPC_URL
 }
