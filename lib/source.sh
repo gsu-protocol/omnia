@@ -5,12 +5,11 @@ _mapSetzer() {
 	_price=$("source-setzer" price "$_assetPair" "$_source")
 	if [[ -n "$_price" && "$_price" =~ ^([1-9][0-9]*([.][0-9]+)?|[0][.][0-9]*[1-9]+[0-9]*)$ ]]; then
 		jq -nc \
-			--arg s $_source \
+			--arg s "$_source" \
 			--arg p "$(LANG=POSIX printf %0.10f "$_price")" \
 			'{($s):$p}'
 	else
-#		error "Failed to get asset price" "asset=$_assetPair" "source=$_source"
-		echo "[$(date "+%D %T")] [E] Failed to get $_assetPair price from $_source is $_price" >&2
+		echo "{\"level\":\"error\",\"msg\":\"Failed to get asset price\",\"asset\":\"$_assetPair\",\"source\":\"$_source\",\"time\":\"$(date "+%s")\"}" &>2
 	fi
 }
 export -f _mapSetzer
@@ -67,10 +66,14 @@ readSourcesWithGofer()   {
 			}
 		' <<<"$_data")"
 	else
-		error --list "Failed getting prices from gofer" "config=$GOFER_CONFIG" "$@"
+		error --list "Failed to get prices from gofer" "config=$GOFER_CONFIG" "$@"
 		return
 	fi
 
-	verbose "gofer [price]" "#=$_output"
+#	while IFS= read -r _json; do
+#		verbose --raw "gofer sourced data" "$_json"
+#	done <<<"$_output"
+	verbose --raw "sourced data" "$(jq -sc 'tojson' <<<"$_output")"
+
 	echo "$_output"
 }

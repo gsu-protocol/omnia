@@ -1,7 +1,8 @@
 #get median of  a list of numbers
 getMedian () {
 	local _numbers=( "$@" )
-	tr " " "\\n" <<< "${_numbers[@]}" | datamash median 1
+#	jq -n --arg d "$*" '{ "names": $d | split(" ") }' >&2
+	tr " " "\\n" <<<"${_numbers[@]}" | datamash median 1 2> >(STDERR_DATA="$(cat)"; [[ -z "$STDERR_DATA" ]] || verbose "datamash [stderr]" "$STDERR_DATA")
 }
 
 #extracts prices from list of messages
@@ -35,7 +36,7 @@ keccak256Hash () {
 	for arg in "$@"; do
 		_inputs+="$arg"
 	done
-	verbose "inputs to hash function = $_inputs"
+	verbose "inputs to hash function" "$_inputs"
 	ethereum keccak "$_inputs"
 }
 
