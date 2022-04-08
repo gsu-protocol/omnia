@@ -42,7 +42,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestPartialInvalidPricesLessThanMin() {
 
 	err = s.Omnia.Start()
 	s.Assert().NoError(err)
-	// fmt.Println(s.Omnia.StdoutString())
 
 	time.Sleep(3 * time.Second)
 
@@ -74,8 +73,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestAllInvalidPrices() {
 
 	err = s.Omnia.Start()
 	s.Assert().NoError(err)
-	// TODO: sleep ?
-	// fmt.Println(s.Omnia.StdoutString())
 
 	time.Sleep(3 * time.Second)
 
@@ -105,7 +102,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestMinValuablePrices() {
 
 	err = s.Omnia.Start()
 	s.Assert().NoError(err)
-	// fmt.Println(s.Omnia.StdoutString())
 
 	ch, err := s.Transport.ReadChan()
 	s.Require().NoError(err)

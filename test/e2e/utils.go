@@ -50,6 +50,12 @@ func (s *SmockerAPISuite) Reset() {
 
 func (s *SmockerAPISuite) Stop() {
 	if s.Omnia != nil {
+
+		// Trying to dump logs on error
+		if s.T().Failed() {
+			s.Omnia.DumpLogs()
+		}
+
 		_ = s.Omnia.Stop()
 	}
 	if s.Transport != nil {
@@ -113,6 +119,11 @@ func (op *OmniaProcess) StdoutString() string {
 
 func (op *OmniaProcess) StderrString() string {
 	return op.Stderr.String()
+}
+
+func (op *OmniaProcess) DumpLogs() {
+	fmt.Println(op.StdoutString())
+	fmt.Println(op.StderrString())
 }
 
 func (op *OmniaProcess) Start() error {
