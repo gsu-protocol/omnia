@@ -17,8 +17,6 @@ ETH_MAXPRICE_MULTIPLIER=""
 ETH_TIP_MULTIPLIER=""
 ETH_GAS_PRIORITY=""
 
-plan 10
-
 # Testing default values
 _json=$(jq -c '.ethereum' <<< "$_validConfig")
 assert "importGasPrice should correctly parse values" run importGasPrice $_json
@@ -36,3 +34,7 @@ assert "ETH_GAS_SOURCE should have value: ethgasstation" match "^ethgasstation$"
 assert "ETH_MAXPRICE_MULTIPLIER should have value: 0.5" match "^0.5$" <<<$ETH_MAXPRICE_MULTIPLIER
 assert "ETH_TIP_MULTIPLIER should have value: 1" match "^1$" <<<$ETH_TIP_MULTIPLIER
 assert "ETH_GAS_PRIORITY should have value: slow" match "^slow$" <<<$ETH_GAS_PRIORITY
+
+# Testing Infura keys
+_network_json='{"network":"http://geth.local:8545","infuraKey":"wrong-key"}'
+assert "infuraKey should fail if incorrect key configured" fail importNetwork $_network_json

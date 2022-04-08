@@ -10,31 +10,31 @@ importEnv () {
 	else
 		error "Error Could not find omnia.conf config file to load parameters."
 		error "Please create /etc/omnia.conf or put it in the config directory."
-		exit 1
+		return 1
 	fi
 	echo "Importing configuration from $config..."
 
 	#check if config file is valid json
-	jq -e . "$config" >/dev/null 2>&1 || { error "Error - Config is not valid JSON"; exit 1; }
+	jq -e . "$config" >/dev/null 2>&1 || { error "Error - Config is not valid JSON"; return 1; }
 
-	importMode "$config"
-	importSources "$config"
-	importTransports "$config"
-	importEthereumEnv "$config"
-	importStarkwareEnv "$config"
-	importAssetPairsEnv "$config"
-	importOptionsEnv "$config"
-	importServicesEnv "$config"
+	importMode "$config" || return 1
+	importSources "$config" || return 1
+	importTransports "$config" || return 1
+	importEthereumEnv "$config" || return 1
+	importStarkwareEnv "$config" || return 1
+	importAssetPairsEnv "$config" || return 1
+	importOptionsEnv "$config" || return 1
+	importServicesEnv "$config" || return 1
 
 	if [[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]]; then
-		importFeeds "$config"
+		importFeeds "$config" || return 1
 	fi
 }
 
 importMode () {
 	local _config="$1"
 	OMNIA_MODE="$(jq -r '.mode' < "$_config" | tr '[:lower:]' '[:upper:]')"
-	[[ "$OMNIA_MODE" =~ ^(FEED|RELAYER|RELAY){1}$ ]] || { error "Error - Invalid Mode param, valid values are 'FEED' and 'RELAYER'"; exit 1; }
+	[[ "$OMNIA_MODE" =~ ^(FEED|RELAYER|RELAY){1}$ ]] || { error "Error - Invalid Mode param, valid values are 'FEED' and 'RELAYER'"; return 1; }
 	export OMNIA_MODE
 }
 
@@ -48,6 +48,10 @@ importTransports () {
 	local _config="$1"
 	readarray -t OMNIA_TRANSPORTS < <(jq -r '.transports[]' "$_config")
 	[[ "${#OMNIA_TRANSPORTS[@]}" -gt 0 ]] || OMNIA_TRANSPORTS=("transport-spire" "transport-ssb")
+}
+
+getLatestBlock () {
+	echo $(ethereum --rpc-url "$1" block latest number)
 }
 
 importNetwork () {
@@ -70,8 +74,8 @@ importNetwork () {
 			;;
 	esac
 
-	[[ $(ethereum --rpc-url "$ETH_RPC_URL" block latest number) =~ ^[1-9]*[0-9]*$ ]] || errors+=("Error - Unable to connect to Ethereum network.\nValid options are: ethlive, mainnet, ropsten, kovan, rinkeby, goerli, or a custom endpoint")
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
+	[[ $(getLatestBlock $ETH_RPC_URL) =~ ^[1-9]*[0-9]*$ ]] || errors+=("Error - Unable to connect to Ethereum network.\nValid options are: ethlive, mainnet, ropsten, kovan, rinkeby, goerli, or a custom endpoint")
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 	export ETH_RPC_URL
 }
 
@@ -94,7 +98,7 @@ importGasPrice () {
 	[[ $ETH_GAS_PRIORITY =~ ^(slow|standard|fast|fastest)$ ]] || errors+=("Error - Ethereum Gas price priority is invalid.\nValid options are: slow, standard, fast, fastest.")
 	export ETH_GAS_PRIORITY
 
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 }
 
 importEthereumEnv () {
@@ -103,7 +107,7 @@ importEthereumEnv () {
 
 	_json=$(jq -S '.ethereum' < "$_config")
 
-	[[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && importNetwork "$_json"
+	[[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && { importNetwork "$_json" || return 1; }
 
 	ETH_FROM="${ETH_FROM-$(jq -r '.from' <<<"$_json")}"
 	#this just checks for valid chars and length, NOT checksum!
@@ -121,9 +125,9 @@ importEthereumEnv () {
 	export ETH_PASSWORD
 
 	# Importing Gas Price
-	[[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && importGasPrice "$_json"
+	[[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && { importGasPrice "$_json" || return 1; }
 
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 }
 
 importStarkwareEnv() {
@@ -154,10 +158,10 @@ importAssetPairsEnv () {
 	#create array of asset pairs
 	readarray -t assetPairs < <(echo "$_json" | jq -r 'keys | .[]')
 
-	[[ ${#assetPairs[@]} -eq 0 ]] && { error "Error - Config must have at least 1 asset pair"; exit 1; }
+	[[ ${#assetPairs[@]} -eq 0 ]] && { error "Error - Config must have at least 1 asset pair"; return 1; }
 
-	[[ $OMNIA_MODE == "FEED" ]] && importAssetPairsFeed
-	[[ $OMNIA_MODE == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && importAssetPairsRelayer
+	[[ $OMNIA_MODE == "FEED" ]] && { importAssetPairsFeed || return 1; }
+	[[ $OMNIA_MODE == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && { importAssetPairsRelayer || return 1; }
 	true
 }
 
@@ -181,7 +185,7 @@ importAssetPairsFeed () {
 		_msgSpread=$(getMsgSpread "$assetPair")
 		[[ "$_msgSpread" =~ ^([1-9][0-9]*([.][0-9]+)?|[0][.][0-9]*[1-9][0-9]*)$ ]] || errors+=("Error - Asset Pair param $assetPair has invalid or missing msgSpread field, must be positive integer or float.")
 	done
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 }
 
 importAssetPairsRelayer () {
@@ -210,7 +214,7 @@ importAssetPairsRelayer () {
 		_oracleSpread=$(getOracleSpread "$assetPair")
 		[[ "$_oracleSpread" =~ ^([1-9][0-9]*([.][0-9]+)?|[0][.][0-9]*[1-9][0-9]*)$ ]] || errors+=("Error - Asset Pair param $assetPair has invalid or missing oracleSpread field, must be positive integer or float")
 	done
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 }
 
 importFeeds () {
@@ -221,9 +225,9 @@ importFeeds () {
 	for feed in "${feeds[@]}"; do
 		[[ $feed =~ ^@[a-zA-Z0-9+/]{43}=.ed25519$ \
 		|| $feed =~ ^0x[0-9a-fA-F]{40}$ \
-		]] || { error "Error - Invalid feed address: $feed"; exit 1; }
+		]] || { error "Error - Invalid feed address: $feed"; return 1; }
 	done
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 }
 
 importOptionsEnv () {
@@ -272,7 +276,7 @@ importOptionsEnv () {
 		export SETZER_ETH_RPC_URL
 	fi
 
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 }
 
 importServicesEnv () {
@@ -283,5 +287,5 @@ importServicesEnv () {
 	jq -e 'type == "object"' <<<"$SSB_ID_MAP" >/dev/null 2>&1 || errors+=("Error - Scuttlebot ID mapping is invalid, must be Ethereum address -> Scuttlebot id.")
 	export SSB_ID_MAP
 
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 }
