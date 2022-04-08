@@ -122,8 +122,10 @@ func (op *OmniaProcess) StderrString() string {
 }
 
 func (op *OmniaProcess) DumpLogs() {
+	fmt.Println("===============   Omnia Logs ================")
 	fmt.Println(op.StdoutString())
 	fmt.Println(op.StderrString())
+	fmt.Println("=============================================")
 }
 
 func (op *OmniaProcess) Start() error {
