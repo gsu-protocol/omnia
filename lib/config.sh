@@ -16,37 +16,38 @@ importEnv () {
 
 	#check if config file is valid json
 	jq -e . "$config" >/dev/null 2>&1 || { error "Error - Config is not valid JSON"; return 1; }
+	_json=$(jq -e . < "$config")
 
-	importMode "$config" || return 1
-	importSources "$config" || return 1
-	importTransports "$config" || return 1
-	importEthereumEnv "$config" || return 1
-	importStarkwareEnv "$config" || return 1
-	importAssetPairsEnv "$config" || return 1
-	importOptionsEnv "$config" || return 1
-	importServicesEnv "$config" || return 1
+	importMode "$_json" || return 1
+	importSources "$_json" || return 1
+	importTransports "$_json" || return 1
+	importEthereumEnv "$_json" || return 1
+	importStarkwareEnv "$_json" || return 1
+	importAssetPairsEnv "$_json" || return 1
+	importOptionsEnv "$_json" || return 1
+	importServicesEnv "$_json" || return 1
 
 	if [[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]]; then
-		importFeeds "$config" || return 1
+		importFeeds "$_json" || return 1
 	fi
 }
 
 importMode () {
-	local _config="$1"
-	OMNIA_MODE="$(jq -r '.mode' < "$_config" | tr '[:lower:]' '[:upper:]')"
+	local _json="$1"
+	OMNIA_MODE="$(jq -r '.mode' <<<$_json | tr '[:lower:]' '[:upper:]')"
 	[[ "$OMNIA_MODE" =~ ^(FEED|RELAYER|RELAY){1}$ ]] || { error "Error - Invalid Mode param, valid values are 'FEED' and 'RELAYER'"; return 1; }
 	export OMNIA_MODE
 }
 
 importSources () {
-	local _config="$1"
-	readarray -t OMNIA_FEED_SOURCES < <(jq -r '.sources[]' "$_config")
+	local _json="$1"
+	readarray -t OMNIA_FEED_SOURCES < <(jq -r '.sources[]' <<<$_json)
 	[[ "${#OMNIA_FEED_SOURCES[@]}" -gt 0 ]] || OMNIA_FEED_SOURCES=("gofer" "setzer")
 }
 
 importTransports () {
-	local _config="$1"
-	readarray -t OMNIA_TRANSPORTS < <(jq -r '.transports[]' "$_config")
+	local _json="$1"
+	readarray -t OMNIA_TRANSPORTS < <(jq -r '.transports[]' <<<$_json)
 	[[ "${#OMNIA_TRANSPORTS[@]}" -gt 0 ]] || OMNIA_TRANSPORTS=("transport-spire" "transport-ssb")
 }
 
@@ -88,11 +89,11 @@ importGasPrice () {
 	export ETH_GAS_SOURCE
 
 	ETH_MAXPRICE_MULTIPLIER="$(echo "$_json" | jq '.gasPrice.maxPriceMultiplier // 1')"
-	[[ $ETH_MAXPRICE_MULTIPLIER =~ ^[0-9\.]+$ ]] || errors+=("Error - Ethereum Gas price multiplier is invalid, should be a number.")
+	[[ $ETH_MAXPRICE_MULTIPLIER =~ ^[0-9\.]+$ ]] || errors+=("Error - Ethereum Gas max price multiplier is invalid, should be a number.")
 	export ETH_MAXPRICE_MULTIPLIER
 
   ETH_TIP_MULTIPLIER="$(echo "$_json" | jq '.gasPrice.tipMultiplier // 1')"
-  [[ $ETH_TIP_MULTIPLIER =~ ^[0-9\.]+$ ]] || errors+=("Error - Ethereum Gas price multiplier is invalid, should be a number.")
+  [[ $ETH_TIP_MULTIPLIER =~ ^[0-9\.]+$ ]] || errors+=("Error - Ethereum Gas price tip multiplier is invalid, should be a number.")
   export ETH_TIP_MULTIPLIER
 
 	ETH_GAS_PRIORITY="$(echo "$_json" | jq -r '.gasPrice.priority // "fast"')"
@@ -106,7 +107,7 @@ importEthereumEnv () {
 	local _config="$1"
 	local _json
 
-	_json=$(jq -S '.ethereum' < "$_config")
+	_json=$(jq -S '.ethereum' <<<"$_config")
 
 	[[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && { importNetwork "$_json" || return 1; }
 
@@ -154,7 +155,7 @@ importAssetPairsEnv () {
 	local _config="$1"
 	local _json
 
-	_json="$(jq -S '.pairs' < "$_config")"
+	_json="$(jq -S '.pairs' <<<"$_config")"
 
 	#create array of asset pairs
 	readarray -t assetPairs < <(echo "$_json" | jq -r 'keys | .[]')
@@ -176,7 +177,7 @@ importAssetPairsFeed () {
 		assetPair="${assetPair^^}"
 		assetPair="${assetPair/\/}"
 		assetInfo[$assetPair]="$info"
-	done < <(jq -r '.pairs | keys[] as $assetPair | "\($assetPair)=\(.[$assetPair] | .msgExpiration),\(.[$assetPair] | .msgSpread)"' "$_config")
+	done < <(jq -r '.pairs | keys[] as $assetPair | "\($assetPair)=\(.[$assetPair] | .msgExpiration),\(.[$assetPair] | .msgSpread)"' <<<"$_config")
 
 	#Verify values
 	for assetPair in "${!assetInfo[@]}"; do
@@ -200,7 +201,7 @@ importAssetPairsRelayer () {
 		assetPair="${assetPair^^}"
 		assetPair="${assetPair/\/}"
 		assetInfo[$assetPair]="$info"
-	done < <(jq -r '.pairs | keys[] as $assetPair | "\($assetPair)=\(.[$assetPair] | .msgExpiration),\(.[$assetPair] | .oracle),\(.[$assetPair] | .oracleExpiration),\(.[$assetPair] | .oracleSpread)"' "$_config")
+	done < <(jq -r '.pairs | keys[] as $assetPair | "\($assetPair)=\(.[$assetPair] | .msgExpiration),\(.[$assetPair] | .oracle),\(.[$assetPair] | .oracleExpiration),\(.[$assetPair] | .oracleSpread)"' <<<"$_config")
 
 	for assetPair in "${!assetInfo[@]}"; do
 		_msgExpiration=$(getMsgExpiration "$assetPair")
@@ -222,7 +223,7 @@ importFeeds () {
 	local _config="$1"
 	local _json
 
-	readarray -t feeds < <(jq -r '.feeds[]' < "$_config")
+	readarray -t feeds < <(jq -r '.feeds[]' <<<"$_config")
 	for feed in "${feeds[@]}"; do
 		[[ $feed =~ ^@[a-zA-Z0-9+/]{43}=.ed25519$ \
 		|| $feed =~ ^0x[0-9a-fA-F]{40}$ \
@@ -235,7 +236,7 @@ importOptionsEnv () {
 	local _config="$1"
 	local _json
 
-	_json=$(jq -S '.options' < "$_config")
+	_json=$(jq -S '.options' <<<"$_config")
 
 	OMNIA_INTERVAL="$(echo "$_json" | jq -S '.interval')"
 	[[ "$OMNIA_INTERVAL" =~ ^[1-9][0-9]*$ ]] || errors+=("Error - Interval param is invalid, must be positive integer.")
@@ -282,7 +283,7 @@ importOptionsEnv () {
 
 importServicesEnv () {
 	local _config="$1"
-	local _services=$(jq -S '.services' "$_config")
+	local _services=$(jq -S '.services' <<<"$_config")
 
 	SSB_ID_MAP="$(jq -S '.scuttlebotIdMap // {}' <<<"$_services")"
 	jq -e 'type == "object"' <<<"$SSB_ID_MAP" >/dev/null 2>&1 || errors+=("Error - Scuttlebot ID mapping is invalid, must be Ethereum address -> Scuttlebot id.")
