@@ -14,6 +14,7 @@ messages_path="$test_path/messages"
 . "$root_path/tap.sh" 2>/dev/null || . "$root_path/test/tap.sh"
 
 _config="$test_path/configs/oracle-feed-test.conf"
+_json=$(jq -e . "$_config")
 
 # Setting up relayer configuration
 OMNIA_MODE="FEED"
@@ -28,13 +29,13 @@ importStarkwareEnv
 assert "readSourcesAndBroadcastAllPriceMessages should fail without configuration" fail readSourcesAndBroadcastAllPriceMessages
 
 # Setting up config one by one
-importAssetPairsEnv "$_config"
+importAssetPairsEnv "$_json"
 assert "readSourcesAndBroadcastAllPriceMessages should fail without OMNIA_FEED_SOURCES configuration" fail readSourcesAndBroadcastAllPriceMessages
 
-importSources "$_config"
+importSources "$_json"
 assert "readSourcesAndBroadcastAllPriceMessages should fail without OMNIA_TRANSPORTS configuration" fail readSourcesAndBroadcastAllPriceMessages
 
-importTransports "$_config"
+importTransports "$_json"
 
 assert "readSource should fail on incorrect source" fail readSource "json" "BAT/USD"
 

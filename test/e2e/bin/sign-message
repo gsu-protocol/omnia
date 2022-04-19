@@ -13,7 +13,7 @@ source "$_path/status.sh"
 source "$_path/util.sh"
 source "$_path/feed.sh"
 
-importEnv >/dev/null 2>&1
+importEnv >/dev/null 2>&1 || exit 1
 OMNIA_VERBOSE=false
 OMNIA_DEBUG=0
 

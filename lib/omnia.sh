@@ -3,7 +3,7 @@ initEnv () {
 	OMNIA_VERSION="$(cat ../version)"
 
 	#Load Global configuration
-	importEnv
+	importEnv || exit 1
 
 	echo ""
 	echo ""

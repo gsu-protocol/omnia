@@ -14,7 +14,9 @@ lib_path="$root_path/lib"
 # Setting up relayer configuration
 OMNIA_MODE="RELAYER"
 
-importAssetPairsEnv "$test_path/configs/oracle-relayer-test.conf"
+_json=$(jq -e . "$test_path/configs/oracle-relayer-test.conf")
+importAssetPairsEnv "$_json"
+
 assert "assetPairs assigned" match "3" < <(capture printf ${#assetPairs[@]})
 
 _pricePulled="false"

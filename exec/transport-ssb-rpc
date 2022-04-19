@@ -88,11 +88,12 @@ publishMsg() {
 	fi
 }
 STDERR_DATA="$(cat)"; [[ -z "$STDERR_DATA" ]] || verbose "ethsign [stderr]" "#=$STDERR_DATA"
+_json=$(jq -e . "$OMNIA_CONFIG")
 {
-	importMode "$OMNIA_CONFIG"
-	importOptionsEnv "$OMNIA_CONFIG"
-	importAssetPairsEnv "$OMNIA_CONFIG"
-	importServicesEnv "$OMNIA_CONFIG"
+	importMode "$_json"
+	importOptionsEnv "$_json"
+	importAssetPairsEnv "$_json"
+	importServicesEnv "$_json"
 } >&2
 
 case "$1" in
