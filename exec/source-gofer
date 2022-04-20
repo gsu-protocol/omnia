@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -eo pipefail
+if [[ -n $OMNIA_DEBUG ]]; then set -x; fi
+
+gofer price --config "$GOFER_CONFIG" --format ndjson "$@" \
+| jq -c '{
+	asset: (.base+"/"+.quote),
+	median: .price,
+	sources: (
+		[ ..
+		| select(type == "object" and .type == "origin" and .error == null)
+		| {(.base+"/"+.quote+"@"+.params.origin): (.price|tostring)}
+		]
+		| add
+	)
+}'

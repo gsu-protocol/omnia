@@ -121,17 +121,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestMinValuablePrices() {
 	s.Assert().NotEmpty(price.Price.R)
 	s.Assert().NotEmpty(price.Price.S)
 	s.Assert().NotEmpty(price.Price.V)
-
-	// Check trace ?
-	s.Assert().Equal("1.0000000000", price.Trace["bitstamp"])
-	s.Assert().Equal("1.0000000000", price.Trace["bittrex"])
-	s.Assert().Equal("1.0000000000", price.Trace["coinbase"])
-	// Should not be in trace list
-	_, ok := price.Trace["gemini"]
-	s.Assert().False(ok)
-	_, ok = price.Trace["kraken"]
-	s.Assert().False(ok)
-
 }
 
 func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
@@ -174,13 +163,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	s.Assert().NotEmpty(price.Price.S)
 	s.Assert().NotEmpty(price.Price.V)
 
-	// Check trace ?
-	s.Assert().Equal("1.0000000000", price.Trace["bitstamp"])
-	s.Assert().Equal("1.0000000000", price.Trace["bittrex"])
-	s.Assert().Equal("1.0000000000", price.Trace["coinbase"])
-	s.Assert().Equal("1.0000000000", price.Trace["gemini"])
-	s.Assert().Equal("1.0000000000", price.Trace["kraken"])
-
 	// Next call
 	// Setup price for BTC/USD
 	err = infestor.NewMocksBuilder().
@@ -207,13 +189,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	s.Assert().NotEmpty(price.Price.S)
 	s.Assert().NotEmpty(price.Price.V)
 
-	// Check trace ?
-	s.Assert().Equal("2.0000000000", price.Trace["bitstamp"])
-	s.Assert().Equal("2.0000000000", price.Trace["bittrex"])
-	s.Assert().Equal("2.0000000000", price.Trace["coinbase"])
-	s.Assert().Equal("2.0000000000", price.Trace["gemini"])
-	s.Assert().Equal("2.0000000000", price.Trace["kraken"])
-
 	// 3rd step
 	// Setup price for BTC/USD
 	err = infestor.NewMocksBuilder().
@@ -239,11 +214,4 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	s.Assert().NotEmpty(price.Price.R)
 	s.Assert().NotEmpty(price.Price.S)
 	s.Assert().NotEmpty(price.Price.V)
-
-	// Check trace ?
-	s.Assert().Equal("3.0000000000", price.Trace["bitstamp"])
-	s.Assert().Equal("3.0000000000", price.Trace["bittrex"])
-	s.Assert().Equal("3.0000000000", price.Trace["coinbase"])
-	s.Assert().Equal("3.0000000000", price.Trace["gemini"])
-	s.Assert().Equal("3.0000000000", price.Trace["kraken"])
 }
