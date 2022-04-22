@@ -36,7 +36,7 @@ services:
       - "--http.vhosts=*"
       - "--rpc.allow-unprotected-txs"
 
-  #  deployer:
+  # deployer:
   #   build:
   #     context: "."
   #     dockerfile: "docker/deployer/Dockerfile"
@@ -111,7 +111,7 @@ services:
       - gofer
       - spire_feed
       - ssb_server_feed
-    image: ghcr.io/chronicleprotocol/omnia_dev:latest
+    image: ghcr.io/chronicleprotocol/omnia:latest
     build:
       context: "."
       args:
@@ -142,7 +142,7 @@ services:
       - geth
       - spire_relay
       - ssb_server_relay
-    image: ghcr.io/chronicleprotocol/omnia_dev:latest
+    image: ghcr.io/chronicleprotocol/omnia:latest
     build:
       context: "."
     volumes:
@@ -163,3 +163,6 @@ services:
       SSB_PORT: "8000"
       OMNIA_VERBOSE: "true"
 #      OMNIA_LOG_FORMAT: "json"
+networks:
+  default:
+    name: omnia_network

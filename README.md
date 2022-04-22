@@ -130,3 +130,17 @@ From here you might run E2E tests using command:
 $ go test -v -p 1 -parallel 1 -cpu 1 ./...
 ```
 
+**NB !!!**
+If our machine wouldn't be able to build `omnia_e2e_dev` with error: 
+
+```bash
+Building omnia_e2e_dev
+Step 1/16 : FROM ghcr.io/chronicleprotocol/omnia:dev
+ERROR: Service 'omnia_e2e_dev' failed to build : Head "https://ghcr.io/v2/chronicleprotocol/omnia/manifests/dev": denied
+```
+
+It mean you have to pull `ghcr.io/chronicleprotocol/omnia:dev` or build it locally using command: 
+
+```bash
+$ docker build -t ghcr.io/chronicleprotocol/omnia:dev .
+```

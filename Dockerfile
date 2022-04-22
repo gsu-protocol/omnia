@@ -3,18 +3,16 @@ RUN apk --no-cache add git
 
 ARG CGO_ENABLED=0
 
-ARG DAPP_BRANCH="master"
-
+ARG ETHSIGN_BRANCH="ethsign/0.17.0"
 WORKDIR /go/src/dapptools
-RUN git clone --depth 1 --branch ${DAPP_BRANCH} https://github.com/dapphub/dapptools.git .
+RUN git clone --depth 1 --branch ${ETHSIGN_BRANCH} https://github.com/dapphub/dapptools.git .
 
 WORKDIR /go/src/dapptools/src/ethsign
 RUN go mod tidy && \
     go mod download && \
     go build .
 
-ARG ORACLE_SUITE_BRANCH="v0.3.5"
-
+ARG ORACLE_SUITE_BRANCH="v0.4.6"
 WORKDIR /go/src/oracle-suite
 RUN git clone --depth 1 --branch ${ORACLE_SUITE_BRANCH} https://github.com/chronicleprotocol/oracle-suite.git .
 
@@ -36,9 +34,9 @@ RUN apk add --update --no-cache \
   && apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
   jshon agrep datamash
 
-COPY --from=go-builder /go/src/dapptools/src/dapp/ /opt/dapp/
 COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
 
+# TODO: release setzer after fixes
 ARG SETZER_REF="b9ddabde9bba61d29a3694ba15b657e36c84b3e7"
 RUN wget https://github.com/makerdao/setzer-mcd/archive/${SETZER_REF}.zip \
    && unzip ${SETZER_REF}.zip \
@@ -52,9 +50,6 @@ COPY --from=go-builder \
   /go/src/oracle-suite/gofer \
   /go/src/oracle-suite/ssb-rpc-client \
   /usr/local/bin/
-
-COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
-COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc
 
 RUN pip install --no-cache-dir mpmath sympy ecdsa==0.16.0
 COPY ./docker/starkware/ /opt/starkware/
@@ -87,16 +82,17 @@ ARG USER=1000
 ARG GROUP=1000
 RUN chown -R ${USER}:${GROUP} ${HOME}
 USER ${USER}:${GROUP}
+
+# Removing notification from `parallel`
 RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
 
 # Setting up PATH for seth, setzer and omnia bin folder
 # Here we have set of different pathes included:
-# - /opt/dapp - For `dapp` executable
 # - /opt/seth - For `seth` executable
 # - /opt/setzer - For `setzer` executable
 # - /opt/starkware - For Starkware python dependency
 # - /opt/omnia/bin - Omnia executables
 # - /opt/omnia/exec - Omnia transports executables
-ENV PATH="/opt/dapp/bin:/opt/seth/bin:/opt/setzer/bin:/opt/starkware:/opt/omnia/bin:/opt/omnia/exec:${PATH}"
+ENV PATH="/opt/seth/bin:/opt/setzer/bin:/opt/starkware:/opt/omnia/bin:/opt/omnia/exec:${PATH}"
 
 CMD ["omnia"]
