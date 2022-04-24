@@ -36,6 +36,8 @@ RUN apk add --update --no-cache \
 
 COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
 
+COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
+
 # TODO: release setzer after fixes
 ARG SETZER_REF="b9ddabde9bba61d29a3694ba15b657e36c84b3e7"
 RUN wget https://github.com/makerdao/setzer-mcd/archive/${SETZER_REF}.zip \
