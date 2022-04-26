@@ -3,7 +3,6 @@ package feeder
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -152,8 +151,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	msg, err := s.Transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
 
-	fmt.Println(msg)
-
 	var price e2e.PriceMessage
 
 	err = json.Unmarshal([]byte(msg), &price)
@@ -182,8 +179,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	msg, err = s.Transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
 
-	fmt.Println(msg)
-
 	err = json.Unmarshal([]byte(msg), &price)
 	s.Require().NoError(err)
 
@@ -209,8 +204,6 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 
 	msg, err = s.Transport.WaitMsg(15 * time.Second)
 	s.Require().NoError(err)
-
-	fmt.Println(msg)
 
 	err = json.Unmarshal([]byte(msg), &price)
 	s.Require().NoError(err)
