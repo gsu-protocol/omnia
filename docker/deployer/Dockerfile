@@ -3,19 +3,21 @@ RUN apk --no-cache add git
 
 ARG CGO_ENABLED=0
 
-ARG ETHSIGN_BRANCH="master"
-ARG ORACLE_SUITE_BRANCH="v0.4.6"
-
 WORKDIR /go/src/dapptools
-RUN git clone --depth 1 --branch ${ETHSIGN_BRANCH} https://github.com/dapphub/dapptools.git .
+ARG ETHSIGN_REF="master"
+RUN git clone https://github.com/dapphub/dapptools.git . \
+  && git checkout --quiet ${ETHSIGN_REF}
 
 WORKDIR /go/src/dapptools/src/ethsign
 RUN go mod tidy && \
   go mod download && \
   go build .
 
+# Building gofer & spire
 WORKDIR /go/src/oracle-suite
-RUN git clone --depth 1 --branch ${ORACLE_SUITE_BRANCH} https://github.com/chronicleprotocol/oracle-suite.git .
+ARG ORACLE_SUITE_REF="tags/v0.4.6"
+RUN git clone https://github.com/chronicleprotocol/oracle-suite.git . \
+  && git checkout --quiet ${ORACLE_SUITE_REF}
 
 RUN go mod tidy && \
   go mod download && \
@@ -23,12 +25,8 @@ RUN go mod tidy && \
   go build ./cmd/gofer && \
   go build ./cmd/ssb-rpc-client
 
-#FROM python:3.10.2-alpine3.15 # failing `test -x FILE`
-#FROM python:3.9.10-alpine3.14 # same
-FROM python:3.9.9-alpine3.15
 
-ARG DAPP_BRANCH="dapp/0.34.1"
-ARG SETZER_REF="b9ddabde9bba61d29a3694ba15b657e36c84b3e7"
+FROM python:3.9.9-alpine3.15
 
 RUN apk add --update --no-cache \
   jq curl git make perl g++ ca-certificates tree \
@@ -39,11 +37,13 @@ RUN apk add --update --no-cache \
   jshon agrep datamash
 
 # Installing setzer
-RUN wget https://github.com/makerdao/setzer-mcd/archive/${SETZER_REF}.zip \
-  && unzip ${SETZER_REF}.zip \
-  && cp -R setzer-mcd-${SETZER_REF}/libexec/setzer/ /root/setzer \
-  && rm -rf setzer-mcd-${SETZER_REF} \
-  && rm ${SETZER_REF}.zip
+ARG SETZER_REF="tags/v0.4.2"
+RUN git clone https://github.com/chronicleprotocol/setzer.git \
+  && cd setzer \
+  && git checkout --quiet ${SETZER_REF} \
+  && cp -R libexec/setzer/ /root/setzer \
+  && cd .. \
+  && rm -rf setzer
 
 COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
 COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc
@@ -63,9 +63,10 @@ RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
 ENV PATH="/opt/dapp/bin:/opt/seth/bin:/opt/setzer/bin:${PATH}"
 
 # Deployment sources
-WORKDIR /home/dapp
 COPY ./docker/geth/bin/median-deploy /usr/local/bin/median-deploy
 COPY ./docker/keystore /root/keystore
+
+WORKDIR /home/dapp
 
 RUN git clone --recurse-submodules https://github.com/makerdao/testchain-medians.git . \
   && dapp build
