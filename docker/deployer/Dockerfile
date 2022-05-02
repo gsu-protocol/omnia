@@ -41,7 +41,9 @@ ARG SETZER_REF="tags/v0.4.2"
 RUN git clone https://github.com/chronicleprotocol/setzer.git \
   && cd setzer \
   && git checkout --quiet ${SETZER_REF} \
-  && cp -R libexec/setzer/ /root/setzer \
+  && mkdir /opt/setzer/ \
+  && cp -R libexec/ /opt/setzer/libexec/ \
+  && cp -R bin /opt/setzer/bin \
   && cd .. \
   && rm -rf setzer
 
