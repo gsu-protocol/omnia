@@ -144,3 +144,63 @@ It mean you have to pull `ghcr.io/chronicleprotocol/omnia:dev` or build it local
 ```bash
 $ docker build -t ghcr.io/chronicleprotocol/omnia:dev .
 ```
+
+## Docker integration
+
+#### Building Omnia with custom dependencies
+
+For production use we building Omnia with predefined locked to tags dependencies:
+
+| Dependency  | Version               | Argument name      | Repository                                        |
+|-------------|-----------------------|--------------------|---------------------------------------------------|
+| Eth Sign    | `tags/ethsign/0.17.0` | `ETHSIGN_REF`      | https://github.com/dapphub/dapptools              |
+| Gofer       | `tags/v0.4.6`         | `ORACLE_SUITE_REF` | https://github.com/chronicleprotocol/oracle-suite |
+| Spire       | `tags/v0.4.6`         | `ORACLE_SUITE_REF` | https://github.com/chronicleprotocol/oracle-suite |
+| Setzer      | `tags/v0.4.2`         | `SETZER_REF`       | https://github.com/chronicleprotocol/setzer       |
+
+We using git reference format to be able to use custom versions/commits for DEV builds.
+If you need to build omnia with custom version you can use [Docker ARGs](https://docs.docker.com/engine/reference/builder/#arg) to do this.
+
+Example: 
+
+```bash
+$ docker build --build-arg ETHSIGN_REF=tags/ethsign/0.16.0 --build-arg SETZER_REF=8819397c3ebd7cf48fac7a3f5ce29985404f9354 -t omnia_custom .
+```
+
+#### Omnia Configuration
+
+Dockerized Omnia default configuration:
+
+| Env Var        | Default value            | Description                        |
+|----------------|--------------------------|------------------------------------|
+| `OMNIA_CONFIG` | `/home/omnia/omnia.json` | Omnia configuration file           |
+| `SPIRE_CONFIG` | `/home/omnia/spire.json` | Spire configuration file           |
+| `GOFER_CONFIG` | `/home/omnia/gofer.json` | Gofer configuration file           |
+| `ETH_RPC_URL`  | `http://geth.local:8545` | Setzer requirement for wstETH pair |
+| `ETH_GAS`      | `7000000`                | Gofer configuration file           |
+
+
+To set custom configuration values use [ENV (environment variables)](https://docs.docker.com/engine/reference/run/#env-environment-variables)
+
+Example:
+
+```bash
+$ docker run -e "ETH_GAS=28282828282" -e "OMNIA_INTERVAL=15" ghcr.io/chronicleprotocol/omnia:latest
+```
+
+Configuration files might be provided by mounting it into Docker container. 
+
+Example: 
+
+Replacing existing file:
+
+```bash
+$ docker run -v $(pwd)/omnia_config.json:/home/omnia/omnia.json ghcr.io/chronicleprotocol/omnia:latest
+```
+
+Setting new configuration file:
+You will have to rewrite `OMNIA_CONFIG` env var.
+
+```bash
+$ docker run -v $(pwd)/omnia_config.json:/home/omnia/omnia_config.json -e OMNIA_CONFIG=/home/omnia/omnia_config.json ghcr.io/chronicleprotocol/omnia:latest
+```
