@@ -68,9 +68,9 @@ RUN git clone https://github.com/chronicleprotocol/setzer.git \
 
 ENV HOME=/home/omnia
 
-ENV OMNIA_CONFIG ${HOME}/omnia.json \
-  SPIRE_CONFIG ${HOME}/spire.json \
-  GOFER_CONFIG ${HOME}/gofer.json \
+ENV OMNIA_CONFIG=${HOME}/omnia.json \
+  SPIRE_CONFIG=${HOME}/spire.json \
+  GOFER_CONFIG=${HOME}/gofer.json \
   ETH_RPC_URL=http://geth.local:8545 \
   ETH_GAS=7000000 \
   CHLORIDE_JS='1'

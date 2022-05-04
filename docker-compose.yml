@@ -46,10 +46,7 @@ services:
 
   ssb_server_feed:
     container_name: ssb-feed.local
-    image: ghcr.io/chronicleprotocol/ssb:dev
-    build:
-      context: "."
-      dockerfile: "docker/ssb-server/Dockerfile"
+    image: ghcr.io/chronicleprotocol/ssb_server:latest
     ports:
       - "8001:8000"
     volumes:
@@ -58,12 +55,7 @@ services:
 
   ssb_server_relay:
     container_name: ssb-relay.local
-    image: ghcr.io/chronicleprotocol/ssb:dev
-    build:
-      context: "."
-      dockerfile: "docker/ssb-server/Dockerfile"
-    expose:
-      - "8000"
+    image: ghcr.io/chronicleprotocol/ssb_server:latest
     ports:
       - "8002:8000"
     volumes:
