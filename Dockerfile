@@ -3,15 +3,19 @@ RUN apk --no-cache add git
 
 ARG CGO_ENABLED=0
 
+# installing seth
 WORKDIR /go/src/dapptools
-ARG ETHSIGN_REF="tags/ethsign/0.17.0"
+ARG SETH_REF="tags/seth/0.11.0"
 RUN git clone https://github.com/dapphub/dapptools.git . \
-  && git checkout --quiet ${ETHSIGN_REF} 
+  && git checkout --quiet ${SETH_REF} 
 
-WORKDIR /go/src/dapptools/src/ethsign
-RUN go mod tidy && \
-  go mod download && \
-  go build .
+WORKDIR /go/src/omnia
+ARG ETHSIGN_REF="tags/v1.10.3"
+RUN git clone https://github.com/chronicleprotocol/omnia.git . \
+  && git checkout --quiet ${ETHSIGN_REF} \
+  && cd ethsign \
+  && go mod vendor \
+  && go build .
 
 # Building gofer & spire
 WORKDIR /go/src/oracle-suite
@@ -19,12 +23,10 @@ ARG ORACLE_SUITE_REF="tags/v0.4.6"
 RUN git clone https://github.com/chronicleprotocol/oracle-suite.git . \
   && git checkout --quiet ${ORACLE_SUITE_REF}
 
-RUN go mod tidy && \
-    go mod download && \
-    go build ./cmd/spire && \
-    go build ./cmd/gofer && \
-    go build ./cmd/ssb-rpc-client
-
+RUN go mod vendor \
+    && go build ./cmd/spire \
+    && go build ./cmd/gofer \
+    && go build ./cmd/ssb-rpc-client
 
 FROM python:3.9.9-alpine3.15
 
@@ -37,15 +39,14 @@ RUN apk add --update --no-cache \
   jshon agrep datamash
 
 COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
-
-COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
-
 COPY --from=go-builder \
-  /go/src/dapptools/src/ethsign/ethsign \
+  /go/src/omnia/ethsign/ethsign \
   /go/src/oracle-suite/spire \
   /go/src/oracle-suite/gofer \
   /go/src/oracle-suite/ssb-rpc-client \
   /usr/local/bin/
+
+COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
 
 RUN pip install --no-cache-dir mpmath sympy ecdsa==0.16.0
 COPY ./docker/starkware/ /opt/starkware/
