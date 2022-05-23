@@ -65,6 +65,7 @@ services:
     volumes:
       - "../:/app"
       - "../lib:/opt/omnia/lib/"
+      - "../exec:/opt/omnia/exec"
       - "../test/e2e/bin/transport-e2e:/opt/omnia/exec/transport-e2e"
     command:
       - "bash"

@@ -3,29 +3,31 @@ RUN apk --no-cache add git
 
 ARG CGO_ENABLED=0
 
-ARG DAPP_BRANCH="master"
-
+# installing seth
 WORKDIR /go/src/dapptools
-RUN git clone --depth 1 --branch ${DAPP_BRANCH} https://github.com/dapphub/dapptools.git .
+ARG SETH_REF="tags/seth/0.11.0"
+RUN git clone https://github.com/dapphub/dapptools.git . \
+  && git checkout --quiet ${SETH_REF} 
 
-WORKDIR /go/src/dapptools/src/ethsign
-RUN go mod tidy && \
-    go mod download && \
-    go build .
+WORKDIR /go/src/omnia
+ARG ETHSIGN_REF="tags/v1.10.3"
+RUN git clone https://github.com/chronicleprotocol/omnia.git . \
+  && git checkout --quiet ${ETHSIGN_REF} \
+  && cd ethsign \
+  && go mod vendor \
+  && go build .
 
-ARG ORACLE_SUITE_BRANCH="v0.3.5"
-
+# Building gofer & spire
 WORKDIR /go/src/oracle-suite
-RUN git clone --depth 1 --branch ${ORACLE_SUITE_BRANCH} https://github.com/chronicleprotocol/oracle-suite.git .
+ARG ORACLE_SUITE_REF="tags/v0.4.6"
+RUN git clone https://github.com/chronicleprotocol/oracle-suite.git . \
+  && git checkout --quiet ${ORACLE_SUITE_REF}
 
-RUN go mod tidy && \
-    go mod download && \
-    go build ./cmd/spire && \
-    go build ./cmd/gofer && \
-    go build ./cmd/ssb-rpc-client
+RUN go mod vendor \
+    && go build ./cmd/spire \
+    && go build ./cmd/gofer \
+    && go build ./cmd/ssb-rpc-client
 
-#FROM python:3.10.2-alpine3.15 # failing `test -x FILE`
-#FROM python:3.9.10-alpine3.14 # same
 FROM python:3.9.9-alpine3.15
 
 RUN apk add --update --no-cache \
@@ -36,25 +38,15 @@ RUN apk add --update --no-cache \
   && apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
   jshon agrep datamash
 
-COPY --from=go-builder /go/src/dapptools/src/dapp/ /opt/dapp/
 COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
-
-ARG SETZER_REF="b9ddabde9bba61d29a3694ba15b657e36c84b3e7"
-RUN wget https://github.com/makerdao/setzer-mcd/archive/${SETZER_REF}.zip \
-   && unzip ${SETZER_REF}.zip \
-   && cp -R setzer-mcd-${SETZER_REF}/ /opt/setzer \
-   && rm -rf setzer-mcd-${SETZER_REF} \
-   && rm ${SETZER_REF}.zip
-
 COPY --from=go-builder \
-  /go/src/dapptools/src/ethsign/ethsign \
+  /go/src/omnia/ethsign/ethsign \
   /go/src/oracle-suite/spire \
   /go/src/oracle-suite/gofer \
   /go/src/oracle-suite/ssb-rpc-client \
   /usr/local/bin/
 
 COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
-COPY ./docker/geth/bin/solc-0.5.12 /usr/local/bin/solc
 
 RUN pip install --no-cache-dir mpmath sympy ecdsa==0.16.0
 COPY ./docker/starkware/ /opt/starkware/
@@ -64,11 +56,22 @@ COPY ./exec /opt/omnia/exec/
 COPY ./lib /opt/omnia/lib/
 COPY ./version /opt/omnia/version
 
+# Installing setzer
+ARG SETZER_REF="tags/v0.4.2"
+RUN git clone https://github.com/chronicleprotocol/setzer.git \
+  && cd setzer \
+  && git checkout --quiet ${SETZER_REF} \
+  && mkdir /opt/setzer/ \
+  && cp -R libexec/ /opt/setzer/libexec/ \
+  && cp -R bin /opt/setzer/bin \
+  && cd .. \
+  && rm -rf setzer
+
 ENV HOME=/home/omnia
 
-ENV OMNIA_CONFIG ${HOME}/omnia.json \
-  SPIRE_CONFIG ${HOME}/spire.json \
-  GOFER_CONFIG ${HOME}/gofer.json \
+ENV OMNIA_CONFIG=${HOME}/omnia.json \
+  SPIRE_CONFIG=${HOME}/spire.json \
+  GOFER_CONFIG=${HOME}/gofer.json \
   ETH_RPC_URL=http://geth.local:8545 \
   ETH_GAS=7000000 \
   CHLORIDE_JS='1'
@@ -87,16 +90,17 @@ ARG USER=1000
 ARG GROUP=1000
 RUN chown -R ${USER}:${GROUP} ${HOME}
 USER ${USER}:${GROUP}
+
+# Removing notification from `parallel`
 RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
 
 # Setting up PATH for seth, setzer and omnia bin folder
 # Here we have set of different pathes included:
-# - /opt/dapp - For `dapp` executable
 # - /opt/seth - For `seth` executable
 # - /opt/setzer - For `setzer` executable
 # - /opt/starkware - For Starkware python dependency
 # - /opt/omnia/bin - Omnia executables
 # - /opt/omnia/exec - Omnia transports executables
-ENV PATH="/opt/dapp/bin:/opt/seth/bin:/opt/setzer/bin:/opt/starkware:/opt/omnia/bin:/opt/omnia/exec:${PATH}"
+ENV PATH="/opt/seth/bin:/opt/setzer/bin:/opt/starkware:/opt/omnia/bin:/opt/omnia/exec:${PATH}"
 
 CMD ["omnia"]
