@@ -6,7 +6,6 @@ lib_path="$root_path/lib"
 . "$lib_path/log.sh"
 . "$lib_path/util.sh"
 . "$lib_path/status.sh"
-. "$lib_path/source.sh"
 
 . "$root_path/tap.sh" 2>/dev/null || . "$root_path/test/tap.sh"
 
@@ -23,6 +22,7 @@ setzer() {
 export -f setzer
 
 # Mock gofer
+export test_path
 gofer() {
 	case "$*" in
 		*BAT/USD*)
@@ -37,10 +37,10 @@ export -f gofer
 
 OMNIA_SRC_TIMEOUT=60
 
-assert "read sources from setzer" run_json readSourcesWithSetzer BAT/USD
+assert "read sources from setzer" run_json source-setzer BAT/USD
 assert "setzer length of sources" json '.sources|length' <<<"3"
 assert "setzer median" json '.median' <<<"0.3"
 
-assert "read sources from gofer" run_json readSourcesWithGofer BAT/USD
+assert "read sources from gofer" run_json source-gofer BAT/USD
 assert "gofer length of sources" json '.sources|length' <<<"5"
 assert "gofer median" json '.median' <<<"0.2"
