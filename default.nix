@@ -1,12 +1,12 @@
 { stdenv, makeWrapper, symlinkJoin, lib, glibcLocales, coreutils, bash, parallel, bc, jq, gnused, datamash, gnugrep, curl
-, ethsign, seth, setzer, stark-cli, ssb-server, oracle-suite, oracleVersion ? "0.0.0-dev" }:
+, ethsign, seth, setzer, ssb-server, oracle-suite, oracleVersion ? "0.0.0-dev" }:
 stdenv.mkDerivation rec {
   name = "omnia-${version}";
   version = lib.fileContents ./version;
   src = ./.;
 
   buildInputs =
-    [ coreutils bash parallel bc jq gnused datamash gnugrep ssb-server ethsign seth setzer stark-cli oracle-suite curl ];
+    [ coreutils bash parallel bc jq gnused datamash gnugrep ssb-server ethsign seth setzer oracle-suite curl ];
   nativeBuildInputs = [ makeWrapper ];
   passthru.runtimeDeps = buildInputs;
 
