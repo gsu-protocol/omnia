@@ -58,7 +58,7 @@ readSource() {
 			for _assetPair in "${_assetPairs[@]}"; do
 				log "Querying price and calculating median" "source=$_src" "asset=${_assetPair}"
 
-				timeout -s9 10 "source-$_src" "$_assetPair" \
+				"source-$_src" "$_assetPair" \
 				| tee >(_data="$(cat)"; [[ -z "$_data" ]] || verbose --raw "source-$_src" "$(jq -sc <<<"$_data")") \
 				|| error "Failed to get price" "app=source-$_src" "asset=$_assetPair"
 			done
