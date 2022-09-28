@@ -8,17 +8,9 @@ getGasPrice() {
 	[[ $ETH_TIP_MULTIPLIER =~ ^[0-9\.]+$  ]] || return 1
 
 	# Getting price from a source
-	local _fees
-	case $ETH_GAS_SOURCE in
-		node) _fees=($(getGasPriceFromNode)) ;;
-		ethgasstation) _fees=($(getGasPriceFromEthGasStation)) ;;
-		*) _fees=($(getGasPriceFromNode)) ;;
-	esac
 
-  # Fallback to node price in case of 0 or invalid price
-  if [[ ! ${_fees[0]} =~ ^[0-9\.]+$ || ${_fees[0]} -eq 0 ]]; then
-    _fees=($(getGasPriceFromNode))
-  fi
+	local _fees
+	_fees=($(getGasPriceFromNode))
 
 	verbose "Sourced gas price" "source=$ETH_GAS_SOURCE" "maxPrice#=${_fees[0]}" "tip#=${_fees[1]}"
 
@@ -57,20 +49,4 @@ getGasPriceFromNode() {
   fi
 
   echo "$_maxPrice $_tip"
-}
-
-getGasPriceFromEthGasStation() {
-	local _key
-	_key=$( case $ETH_GAS_PRIORITY in
-		slow) printf "safeLow" ;;
-		standard) printf "average" ;;
-		fast) printf "fast" ;;
-		fastest) printf "fastest" ;;
-		*) printf "fast" ;;
-	esac)
-
-	local _price
-	_price=$(curl -m 30 --silent --location "https://ethgasstation.info/json/ethgasAPI.json" | jq -r --arg key "$_key" '.[$key] // 0')
-
-	echo $((_price * 100000000)) $((_price * 100000000))
 }
