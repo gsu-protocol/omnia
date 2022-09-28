@@ -37,12 +37,17 @@ getGasPrice() {
 }
 
 getGasPriceFromNode() {
-  local _tip
-  _tip=$(ethereum rpc eth_maxPriorityFeePerGas)
-  if [[ ! $_tip =~ ^[0-9\.]+$ ]]; then
-    echo 0
-    return
-  fi
+	local _tip
+	if [[ $ETH_TX_TYPE -eq 2 ]]
+	then
+		_tip=$(ethereum rpc eth_maxPriorityFeePerGas)
+		if [[ ! $_tip =~ ^[0-9\.]+$ ]]; then
+			echo 0
+			return
+		fi
+	else
+		_tip=0
+	fi
 
   local _maxPrice
   _maxPrice=$(ethereum rpc eth_gasPrice)
