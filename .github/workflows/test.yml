@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - master
+      - develop
   push:
     branches:
       - master
+      - develop
 
 jobs:
   unit-test:
@@ -26,6 +28,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        id: buildx
+        with:
+          install: true
 
       - name: PreBuild Omnia images (Remove after PR merge)
         run: docker build -t ghcr.io/chronicleprotocol/omnia:dev -f Dockerfile .
@@ -49,7 +57,10 @@ jobs:
           platforms: all
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1.6.0
+        uses: docker/setup-buildx-action@v2
+        id: buildx
+        with:
+          install: true
 
       - name: Login to Github Packages
         uses: docker/login-action@v1
