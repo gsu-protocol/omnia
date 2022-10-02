@@ -10,7 +10,7 @@ RUN git clone https://github.com/dapphub/dapptools.git . \
   && git checkout --quiet ${SETH_REF} 
 
 WORKDIR /go/src/omnia
-ARG ETHSIGN_REF="tags/v1.10.3"
+ARG ETHSIGN_REF="tags/v1.11.0"
 RUN git clone https://github.com/chronicleprotocol/omnia.git . \
   && git checkout --quiet ${ETHSIGN_REF} \
   && cd ethsign \
@@ -19,7 +19,7 @@ RUN git clone https://github.com/chronicleprotocol/omnia.git . \
 
 # Building gofer & spire
 WORKDIR /go/src/oracle-suite
-ARG ORACLE_SUITE_REF="tags/v0.5.2"
+ARG ORACLE_SUITE_REF="tags/v0.6.11"
 RUN git clone https://github.com/chronicleprotocol/oracle-suite.git . \
   && git checkout --quiet ${ORACLE_SUITE_REF}
 
@@ -56,7 +56,7 @@ COPY ./lib /opt/omnia/lib/
 COPY ./version /opt/omnia/version
 
 # Installing setzer
-ARG SETZER_REF="tags/v0.4.2"
+ARG SETZER_REF="tags/v0.5.1"
 RUN git clone https://github.com/chronicleprotocol/setzer.git \
   && cd setzer \
   && git checkout --quiet ${SETZER_REF} \
