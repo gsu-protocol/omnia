@@ -32,6 +32,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestPartialInvalidPricesLessThanMin() {
 	err := infestor.NewMocksBuilder().
 		Reset().
 		Add(origin.NewExchange("bitstamp").WithSymbol("BTC/USD").WithPrice(1)).
+		Add(origin.NewExchange("binance_us").WithSymbol("BTC/USD").WithStatusCode(http.StatusNotFound)).
 		Add(origin.NewExchange("bittrex").WithSymbol("BTC/USD").WithStatusCode(http.StatusNotFound)).
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
@@ -94,6 +95,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestMinValuablePrices() {
 		Add(origin.NewExchange("bitstamp").WithSymbol("BTC/USD").WithPrice(1)).
 		Add(origin.NewExchange("bittrex").WithSymbol("BTC/USD").WithPrice(1)).
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(1)).
+		Add(origin.NewExchange("binance_us").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("kraken").WithSymbol("XXBT/ZUSD").WithStatusCode(http.StatusConflict)).
 		Deploy(s.API)
@@ -132,6 +134,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	// Setup price for BTC/USD
 	err := infestor.NewMocksBuilder().
 		Reset().
+		Add(origin.NewExchange("binance_us").WithSymbol("BTC/USD").WithPrice(1)).
 		Add(origin.NewExchange("bitstamp").WithSymbol("BTC/USD").WithPrice(1)).
 		Add(origin.NewExchange("bittrex").WithSymbol("BTC/USD").WithPrice(1)).
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(1)).
@@ -167,6 +170,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	// Setup price for BTC/USD
 	err = infestor.NewMocksBuilder().
 		Reset().
+		Add(origin.NewExchange("binance_us").WithSymbol("BTC/USD").WithPrice(2)).
 		Add(origin.NewExchange("bitstamp").WithSymbol("BTC/USD").WithPrice(2)).
 		Add(origin.NewExchange("bittrex").WithSymbol("BTC/USD").WithPrice(2)).
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(2)).
@@ -193,6 +197,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 	// Setup price for BTC/USD
 	err = infestor.NewMocksBuilder().
 		Reset().
+		Add(origin.NewExchange("binance_us").WithSymbol("BTC/USD").WithPrice(3)).
 		Add(origin.NewExchange("bitstamp").WithSymbol("BTC/USD").WithPrice(3)).
 		Add(origin.NewExchange("bittrex").WithSymbol("BTC/USD").WithPrice(3)).
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(3)).

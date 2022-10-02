@@ -40,6 +40,7 @@ func (s *RelayBaseBehaviourE2ESuite) SetupSuite() {
 	// Setup price for BTC/USD
 	err = infestor.NewMocksBuilder().
 		Reset().
+		Add(origin.NewExchange("binance_us").WithSymbol("BTC/USD").WithPrice(0.4)).
 		Add(origin.NewExchange("bitstamp").WithSymbol("BTC/USD").WithPrice(0.4)).
 		Add(origin.NewExchange("bittrex").WithSymbol("BTC/USD").WithPrice(0.4)).
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithPrice(0.4)).
