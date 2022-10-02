@@ -69,6 +69,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Docker Compose version
+        run: docker-compose version
+
       - name: PreBuild Omnia images (Remove after PR merge)
         run: docker build -t ghcr.io/chronicleprotocol/omnia:dev -f Dockerfile .
       - name: Building Omnia e2e image
