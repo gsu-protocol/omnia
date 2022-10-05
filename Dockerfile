@@ -28,7 +28,7 @@ RUN go mod vendor \
     && go build ./cmd/gofer \
     && go build ./cmd/ssb-rpc-client
 
-FROM python:3.9.9-alpine3.15
+FROM python:3.9-alpine3.16
 
 RUN apk add --update --no-cache \
   jq curl git make perl g++ ca-certificates parallel tree \

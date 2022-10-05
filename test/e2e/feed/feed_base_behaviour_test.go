@@ -32,8 +32,8 @@ func (s *FeedBaseBehaviourE2ESuite) TestPartialInvalidPricesLessThanMin() {
 	err := infestor.NewMocksBuilder().
 		Reset().
 		Add(origin.NewExchange("bitstamp").WithSymbol("BTC/USD").WithPrice(1)).
-		Add(origin.NewExchange("binance_us").WithSymbol("BTC/USD").WithStatusCode(http.StatusNotFound)).
 		Add(origin.NewExchange("bittrex").WithSymbol("BTC/USD").WithStatusCode(http.StatusNotFound)).
+		Add(origin.NewExchange("binance_us").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("coinbase").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("gemini").WithSymbol("BTC/USD").WithStatusCode(http.StatusConflict)).
 		Add(origin.NewExchange("kraken").WithSymbol("XXBT/ZUSD").WithStatusCode(http.StatusConflict)).
@@ -161,7 +161,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 
 	s.Assert().Equal("BTCUSD", price.Price.Wat)
 	s.Assert().Equal("1000000000000000000", price.Price.Val)
-	s.Assert().Greater(time.Now().Unix(), price.Price.Age)
+	s.Assert().GreaterOrEqual(time.Now().Unix(), price.Price.Age)
 	s.Assert().NotEmpty(price.Price.R)
 	s.Assert().NotEmpty(price.Price.S)
 	s.Assert().NotEmpty(price.Price.V)
@@ -188,7 +188,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 
 	s.Assert().Equal("BTCUSD", price.Price.Wat)
 	s.Assert().Equal("2000000000000000000", price.Price.Val)
-	s.Assert().Greater(time.Now().Unix(), price.Price.Age)
+	s.Assert().GreaterOrEqual(time.Now().Unix(), price.Price.Age)
 	s.Assert().NotEmpty(price.Price.R)
 	s.Assert().NotEmpty(price.Price.S)
 	s.Assert().NotEmpty(price.Price.V)
@@ -215,7 +215,7 @@ func (s *FeedBaseBehaviourE2ESuite) TestBaseSuccessBehaviour() {
 
 	s.Assert().Equal("BTCUSD", price.Price.Wat)
 	s.Assert().Equal("3000000000000000000", price.Price.Val)
-	s.Assert().Greater(time.Now().Unix(), price.Price.Age)
+	s.Assert().GreaterOrEqual(time.Now().Unix(), price.Price.Age)
 	s.Assert().NotEmpty(price.Price.R)
 	s.Assert().NotEmpty(price.Price.S)
 	s.Assert().NotEmpty(price.Price.V)
