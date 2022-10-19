@@ -62,24 +62,43 @@ importNetwork () {
 	[[ -z "$INFURA_KEY" ]] || [[ "$INFURA_KEY" =~ ^[0-9a-f]{32}$ ]] || errors+=("Error - Invalid Infura Key")
 	export INFURA_KEY
 
-	local network
-	network="$(echo "$_json" | jq -r .network)"
-	network="${network,,}"
-	case "${network}" in
+	local _network
+	_network="$(echo "$_json" | jq -r '.network')"
+	_network="${_network,,}"
+	case "${_network}" in
 		ethlive|mainnet)
 			ETH_RPC_URL="https://mainnet.infura.io/v3/$INFURA_KEY"
 			;;
 		ropsten|kovan|rinkeby|goerli)
-			ETH_RPC_URL="https://${network}.infura.io/v3/$INFURA_KEY"
+			ETH_RPC_URL="https://${_network}.infura.io/v3/$INFURA_KEY"
 			;;
 		*)
-			ETH_RPC_URL="$network"
+			ETH_RPC_URL="$_network"
 			;;
 	esac
-
-	[[ $(getLatestBlock "$ETH_RPC_URL") =~ ^[1-9]{1,}[0-9]*$ ]] || errors+=("Error - Unable to connect to Ethereum network.\nValid options are: ethlive, mainnet, ropsten, kovan, rinkeby, goerli, or a custom endpoint")
-	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 	export ETH_RPC_URL
+
+	local _chainType
+	_chainType="$(echo "$_json" | jq -r '.type')"
+	_chainType="${_chainType,,}"
+
+	[[ -n "$_chainType" ]] || ETH_TX_TYPE=2
+
+	case "${_chainType}" in
+		ethereum)
+			ETH_TX_TYPE=2
+			;;
+		optimism|arbitrum)
+			ETH_TX_TYPE=0
+			;;
+		*)
+			error "Chain type must be one of [ethereum|optimism|arbitrum]"
+			;;
+	esac
+	export ETH_TX_TYPE
+
+	[[ $(getLatestBlock "$ETH_RPC_URL") =~ ^[1-9]{1,}[0-9]*$ ]] || errors+=("Error - Unable to connect to Ethereum _network.\nValid options are: ethlive, mainnet, ropsten, kovan, rinkeby, goerli, or a custom endpoint")
+	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; return 1; }
 }
 
 importGasPrice () {

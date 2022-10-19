@@ -8,25 +8,6 @@ lib_path="$root_path/lib"
 
 . "$root_path/tap.sh" 2>/dev/null || . "$root_path/test/tap.sh"
 
-# GasStation test:
-ETH_GAS_SOURCE="ethgasstation"
-ETH_MAXPRICE_MULTIPLIER="1"
-ETH_TIP_MULTIPLIER="1"
-
-curl () {
-  echo '{"fast": 80.0, "fastest": 90.0, "safeLow": 60.0, "average": 70.0, "block_time": 14.456521739130435, "blockNum": 13085129}'
-}
-export -f curl
-
-ETH_GAS_PRIORITY="fastest"
-assert "getGasPrice using gasstation should return 9000000000 9000000000 using $ETH_GAS_PRIORITY priority" match "^9000000000 9000000000" < <(capture getGasPrice)
-ETH_GAS_PRIORITY="fast"
-assert "getGasPrice using gasstation should return: 8000000000 8000000000 using $ETH_GAS_PRIORITY priority" match "^8000000000 8000000000$" < <(capture getGasPrice)
-ETH_GAS_PRIORITY="standard"
-assert "getGasPrice using gasstation should return: 7000000000 7000000000 using $ETH_GAS_PRIORITY priority" match "^7000000000 7000000000" < <(capture getGasPrice)
-ETH_GAS_PRIORITY="slow"
-assert "getGasPrice using gasstation should return: 6000000000 6000000000 using $ETH_GAS_PRIORITY priority" match "^6000000000 6000000000" < <(capture getGasPrice)
-
 # GetGasPrice multipliers:
 getGasPriceFromNode () {
   echo "20 10"
@@ -56,27 +37,3 @@ assert "getGasPrice should fail if the ETH_MAXPRICE_MULTIPLIER is not set" fail 
 ETH_MAXPRICE_MULTIPLIER="1"
 ETH_TIP_MULTIPLIER=""
 assert "getGasPrice should fail if the ETH_TIP_MULTIPLIER is not set" fail getGasPrice
-
-# GetGasPrice fallback test:
-ETH_GAS_SOURCE="ethgasstation"
-ETH_MAXPRICE_MULTIPLIER="1"
-ETH_TIP_MULTIPLIER="1"
-
-getGasPriceFromNode () { 
-  echo "20 10"
-}
-export -f getGasPriceFromNode
-
-getGasPriceFromEthGasStation () {
-  echo "0"
-}
-export -f getGasPriceFromEthGasStation
-
-assert "getGasPrice falls back to getGasPriceFromNode in case of invalid price" match "^20 10$" < <(capture getGasPrice)
-
-getGasPriceFromEthGasStation () {
-  echo "err"
-}
-export -f getGasPriceFromEthGasStation
-
-assert "getGasPrice falls back to getGasPriceFromNode in case of non numeric price" match "^20 10$" < <(capture getGasPrice)

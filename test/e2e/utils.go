@@ -14,7 +14,10 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const OmniaDefaultTimeout = 10 * time.Second
+const (
+	OmniaDefaultTimeout = 10 * time.Second
+	smockerPort         = 8081
+)
 
 type SmockerAPISuite struct {
 	suite.Suite
@@ -32,8 +35,7 @@ func (s *SmockerAPISuite) Setup() {
 	s.Ctx = context.Background()
 
 	s.API = smocker.API{
-		Host: smockerHost,
-		Port: 8081,
+		fmt.Sprintf("%s:%d", smockerHost, smockerPort),
 	}
 
 	s.url = fmt.Sprintf("%s:8080", smockerHost)
