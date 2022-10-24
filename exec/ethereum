@@ -4,6 +4,6 @@ if [[ -n $OMNIA_DEBUG ]]; then set -x; fi
 
 cd "$(cd "${0%/*/*}" && pwd)/lib"
 source ./log.sh
-verbose --list "seth()" "$@"
+verbose --list "cast()" "$@"
 
-seth "$@" 2> >(STDERR_DATA="$(cat)"; [[ -z "$STDERR_DATA" ]] || verbose "seth [stderr]" "$STDERR_DATA")
+cast "$@" 2> >(STDERR_DATA="$(cat)"; [[ -z "$STDERR_DATA" ]] || verbose "cast [stderr]" "$STDERR_DATA")

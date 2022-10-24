@@ -7,7 +7,7 @@ pullOracleTime () {
 		return 1
 	fi
 
-	timeout -s9 10 ethereum --rpc-url "$ETH_RPC_URL" call "$_address" "age()(uint32)"
+	timeout -s9 10 ethereum call "$_address" "age()(uint32)" --rpc-url "$ETH_RPC_URL"
 }
 
 pullOracleQuorum () {
@@ -19,7 +19,7 @@ pullOracleQuorum () {
 		return 1
 	fi
 
-	timeout -s9 10 ethereum --rpc-url "$ETH_RPC_URL" call "$_address" "bar()(uint256)"
+	timeout -s9 10 ethereum call "$_address" "bar()(uint256)" --rpc-url "$ETH_RPC_URL"
 }
 
 pullOraclePrice () {
@@ -32,7 +32,7 @@ pullOraclePrice () {
 			return 1
 	fi
 
-	_rawStorage=$(timeout -s9 10 ethereum --rpc-url "$ETH_RPC_URL" storage "$_address" 0x1)
+	_rawStorage=$(timeout -s9 10 ethereum storage "$_address" 0x1 --rpc-url "$ETH_RPC_URL")
 
 	[[ "${#_rawStorage}" -ne 66 ]] && error "oracle contract storage query failed" && return
 
@@ -59,7 +59,7 @@ pushOraclePrice () {
 		_gasParams+=(--gas "$ETH_GAS")
 
 		log "Sending tx..."
-		tx=$(ethereum "${_gasParams[@]}" \
+		tx=$(ethereum --rpc-url "$ETH_RPC_URL" \
 				send --async "$_oracleContract" 'poke(uint256[] memory,uint256[] memory,uint8[] memory,bytes32[] memory,bytes32[] memory)' \
 				"[$(join "${allPrices[@]}")]" \
 				"[$(join "${allTimes[@]}")]" \
@@ -67,8 +67,8 @@ pushOraclePrice () {
 				"[$(join "${allR[@]}")]" \
 				"[$(join "${allS[@]}")]")
 		
-		_status="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" status)"
-		_gasUsed="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" gasUsed)"
+		_status="$(timeout -s9 60 ethereum receipt "$tx" status --rpc-url "$ETH_RPC_URL" )"
+		_gasUsed="$(timeout -s9 60 ethereum receipt "$tx" gasUsed --rpc-url "$ETH_RPC_URL" )"
 		
 		# Monitoring node helper JSON
 		verbose "Transaction receipt" "tx=$tx" "type=$ETH_TX_TYPE" "maxGasPrice=${_fees[0]}" "prioFee=${_fees[1]}" "gasUsed=$_gasUsed" "status=$_status"

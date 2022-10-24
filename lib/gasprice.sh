@@ -14,7 +14,7 @@ getGasPrice() {
 
 	verbose "Sourced gas price" "source=$ETH_GAS_SOURCE" "maxPrice#=${_fees[0]}" "tip#=${_fees[1]}"
 
-	# Handle issues with seth
+	# Handle issues with cast
 	if  [[ ! ${_fees[0]} =~ ^[0-9\.]+$ ]]; then
 		error "Error - Invalid GAS price received: ${_fees[0]}"
 		return 1

@@ -17,12 +17,6 @@
   },
   "transports":["spire","ssb-rpc"],
   "pairs": {
-    "BATUSD": {
-      "oracle": "0x16EeC2D83c58a51Ad515b8BfC195183a15705474",
-      "oracleSpread": 1.0,
-      "oracleExpiration": 15500,
-      "msgExpiration": 1800
-    },
     "BTCUSD": {
       "oracle": "0x9b637fDF5482340C823930366464c146f318b896",
       "oracleSpread": 0.5,
@@ -32,18 +26,6 @@
     "ETHUSD": {
       "oracle": "0x659D4343c656bEafb2441C50a0fb3d513374fe66",
       "oracleSpread": 0.5,
-      "oracleExpiration": 15500,
-      "msgExpiration": 1800
-    },
-    "KNCUSD": {
-      "oracle": "0x415Ef5a18A176f01969C669fdf416dCB8702698C",
-      "oracleSpread": 1.0,
-      "oracleExpiration": 15500,
-      "msgExpiration": 1800
-    },
-    "MANAUSD": {
-      "oracle": "0x6031Dff0E8fdb56433b02D5727Cc34d34854cd87",
-      "oracleSpread": 1.0,
       "oracleExpiration": 15500,
       "msgExpiration": 1800
     }

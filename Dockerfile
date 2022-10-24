@@ -1,3 +1,20 @@
+FROM alpine:3.16 as rust-builder
+ENV CFLAGS=-mno-outline-atomics
+WORKDIR /opt
+RUN apk add clang lld curl build-base linux-headers git \
+  && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh \
+  && chmod +x ./rustup.sh \
+  && ./rustup.sh -y
+
+WORKDIR /opt/foundry
+
+ARG CAST_REF="master"
+RUN git clone https://github.com/foundry-rs/foundry.git . \
+  && git checkout --quiet ${CAST_REF} 
+
+RUN source $HOME/.profile && cargo build --release \
+  && strip /opt/foundry/target/release/cast
+
 FROM golang:1.18-alpine3.16 as go-builder
 RUN apk --no-cache add git
 
@@ -30,14 +47,23 @@ RUN go mod vendor \
 
 FROM python:3.9-alpine3.16
 
+ENV GLIBC_KEY=https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+ENV GLIBC_KEY_FILE=/etc/apk/keys/sgerrand.rsa.pub
+ENV GLIBC_RELEASE=https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk
+
 RUN apk add --update --no-cache \
   jq curl git make perl g++ ca-certificates parallel tree \
-  bash bash-doc bash-completion \
+  bash bash-doc bash-completion linux-headers gcompat git \
   util-linux pciutils usbutils coreutils binutils findutils grep iproute2 \
   nodejs \
   && apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
   jshon agrep datamash
 
+RUN wget -q -O ${GLIBC_KEY_FILE} ${GLIBC_KEY} \
+  && wget -O glibc.apk ${GLIBC_RELEASE} \
+  && apk add glibc.apk --force
+
+COPY --from=rust-builder /opt/foundry/target/release/cast /usr/local/bin/cast
 COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
 COPY --from=go-builder \
   /go/src/omnia/ethsign/ethsign \

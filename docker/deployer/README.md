@@ -15,8 +15,7 @@ List of preinstalled tools:
  - hevm v0.48.1
  - solc v0.5.12
  - ethsign v0.17.0
- - dapp v0.34.1
- - seth 
+ - cast 
  - setzer ref/b9ddabde9bba61d29a3694ba15b657e36c84b3e7
  - gofer v0.4.6
  - ssb
