@@ -1,9 +1,5 @@
 FROM alpine:3.16 as rust-builder
-RUN <<EOT ash
-  if [ "arm64" = "$TARGETARCH" ]; then
-    export CFLAGS=-mno-outline-atomics
-  fi
-EOT
+# ENV CFLAGS=-mno-outline-atomics
 
 WORKDIR /opt
 RUN apk add clang lld curl build-base linux-headers git \
