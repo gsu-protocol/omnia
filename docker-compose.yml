@@ -9,7 +9,7 @@ services:
       - "8545:8545"
       - "30303:30303"
     volumes:
-      - "./docker/geth/data:/home/geth/data"
+      # - "./docker/geth/data:/home/geth/data"
       - "./docker/geth/config:/home/geth/config"
       - "./docker/keystore:/home/geth/keystore"
     command:
