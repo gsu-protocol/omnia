@@ -138,10 +138,12 @@ services:
     build:
       context: "."
     volumes:
-      # - "./bin:/opt/omnia/bin"
-      # - "./lib:/opt/omnia/lib"
-      # - "./exec:/opt/omnia/exec"
-      # - "./test:/opt/omnia/test"
+      - "./bin:/opt/omnia/bin"
+      - "./lib:/opt/omnia/lib"
+      - "./exec:/opt/omnia/exec"
+      - "./test:/opt/omnia/test"
+
+      - "../dapptools/src/seth/:/opt/seth/"
 
       - "./config/relay.json:/home/omnia/omnia.json"
       - "./docker/spire/config/client_relay.json:/home/omnia/spire.json"
@@ -149,6 +151,11 @@ services:
       - "./docker/ssb-server/config/relay_config.json:/home/omnia/.ssb/config"
       - "./docker/ssb-server/config/relay_secret:/home/omnia/.ssb/secret"
     environment:
+      ETH_RPC_URL: "http://geth.local:8545"
+      ETH_FROM: "0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6"
+      ETH_GAS_SOURCE: "node"
+      ETH_MAXPRICE_MULTIPLIER: 1
+
       SSB_KEYS: "/home/omnia/.ssb/secret"
       SSB_CONF: "/home/omnia/.ssb/config"
       SSB_HOST: "ssb-relay.local"
