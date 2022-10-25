@@ -118,6 +118,7 @@ services:
       - "./docker/spire/config/client_feed.json:/home/omnia/spire.json"
       - "./docker/gofer/client.json:/home/omnia/gofer.json"
 
+      - "./docker/keystore/:/home/omnia/.ethereum/keystore/"
       - "./docker/ssb-server/config/feed_config.json:/home/omnia/.ssb/config"
       - "./docker/ssb-server/config/feed_secret:/home/omnia/.ssb/secret"
 
@@ -148,6 +149,7 @@ services:
       - "./config/relay.json:/home/omnia/omnia.json"
       - "./docker/spire/config/client_relay.json:/home/omnia/spire.json"
 
+      - "./docker/keystore/:/home/omnia/.ethereum/keystore/"
       - "./docker/ssb-server/config/relay_config.json:/home/omnia/.ssb/config"
       - "./docker/ssb-server/config/relay_secret:/home/omnia/.ssb/secret"
     environment:
