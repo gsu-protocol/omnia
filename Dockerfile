@@ -1,11 +1,13 @@
 FROM alpine:3.16 as rust-builder
-# ENV CFLAGS=-mno-outline-atomics
+ARG TARGETARCH
 
 WORKDIR /opt
 RUN apk add clang lld curl build-base linux-headers git \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh \
   && chmod +x ./rustup.sh \
   && ./rustup.sh -y
+
+RUN [[ "$TARGETARCH" = "arm64" ]] && echo "export CFLAGS=-mno-outline-atomics" >> $HOME/.profile
 
 WORKDIR /opt/foundry
 
