@@ -1,4 +1,13 @@
-FROM rust:latest as rust-builder
+FROM alpine:3.16 as rust-builder
+ARG TARGETARCH
+
+WORKDIR /opt
+RUN apk add clang lld curl build-base linux-headers git \
+  && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh \
+  && chmod +x ./rustup.sh \
+  && ./rustup.sh -y
+
+RUN [[ "$TARGETARCH" = "arm64" ]] && echo "export CFLAGS=-mno-outline-atomics" >> $HOME/.profile
 
 WORKDIR /opt/foundry
 
@@ -6,7 +15,7 @@ ARG CAST_REF="master"
 RUN git clone https://github.com/foundry-rs/foundry.git . \
   && git checkout --quiet ${CAST_REF} 
 
-RUN cargo build --release \
+RUN source $HOME/.profile && cargo build --release \
   && strip /opt/foundry/target/release/cast
 
 FROM golang:1.18-alpine3.16 as go-builder
