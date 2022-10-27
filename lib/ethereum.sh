@@ -43,6 +43,15 @@ signTxBeforePush() {
 	local _to="$1"
 	local data="$2"
 
+	# Using custom gas pricing strategy
+	local _fees=($(getGasPrice))
+	local _gasPrice="${_fees[0]}"
+	local _gasPrio="${_fees[1]}"
+
+	if [ "$_gasPrice" -eq "0" ]; then 
+		_gasPrice=$(ethereum gas-price --rpc-url "$ETH_RPC_URL")
+	fi
+
 	value=$(ethereum --to-wei "${ETH_VALUE:-0}")
 	value=$(ethereum --to-hex "$value")
 
@@ -50,15 +59,15 @@ signTxBeforePush() {
 		--from "$(ethereum --to-checksum-address "$ETH_FROM")"
 		--nonce "${ETH_NONCE:-$(ethereum nonce --rpc-url "$ETH_RPC_URL" "$ETH_FROM")}"
 		--chain-id "$(ethereum chain-id)"
-		--gas-price "${ETH_GAS_PRICE:-$(ethereum gas-price --rpc-url "$ETH_RPC_URL")}"
+		--gas-price "$_gasPrice"
 		--gas-limit "${ETH_GAS:-200000}"
 		--value "$value"
 		--data "${data:-0x}"
 		--to "$(ethereum --to-checksum-address "$_to")"
 	)
 
-	if [[ $ETH_PRIO_FEE ]]; then
-		args+=(--prio-fee "$ETH_PRIO_FEE")
+	if [ $ETH_TX_TYPE -eq 2 ] && [ "$_gasPrio" ]; then 
+		args+=(--prio-fee "$_gasPrio")
 	fi
 
 	if [ -n "$ETH_PASSWORD" ]; then args+=(--passphrase-file "$ETH_PASSWORD"); fi
@@ -70,10 +79,6 @@ signTxBeforePush() {
 pushOraclePrice () {
 		local _assetPair="$1"
 		local _oracleContract
-		
-		# Using custom gas pricing strategy
-		local _fees
-		_fees=($(getGasPrice))
 
 		_oracleContract=$(getOracleContract "$_assetPair")
 		if ! [[ "$_oracleContract" =~ ^(0x){1}[0-9a-fA-F]{40}$ ]]; then
