@@ -107,12 +107,10 @@ pushOraclePrice () {
 		_txdata=$(signTxBeforePush $_oracleContract $_calldata $_fees)
 
 		log "Sending tx..."
-		tx=$(timeout -s9 60 ethereum publish --rpc-url "$ETH_RPC_URL" $_txdata)
+		tx=$(ethereum publish --async --rpc-url "$ETH_RPC_URL" $_txdata)
 		
-		_status="$(jq '.status' <<<"$tx")"
-		_status="$(jq '.gasUsed' <<<"$tx")"
-		# _status="$(timeout -s9 60 ethereum receipt "$tx" status --rpc-url "$ETH_RPC_URL" )"
-		# _gasUsed="$(timeout -s9 60 ethereum receipt "$tx" gasUsed --rpc-url "$ETH_RPC_URL" )"
+		_status="$(timeout -s9 60 ethereum receipt "$tx" status --rpc-url "$ETH_RPC_URL" )"
+		_gasUsed="$(timeout -s9 60 ethereum receipt "$tx" gasUsed --rpc-url "$ETH_RPC_URL" )"
 		
 		# Monitoring node helper JSON
 		verbose "Transaction receipt" "tx=$tx" "type=$ETH_TX_TYPE" "maxGasPrice=${_fees[0]}" "prioFee=${_fees[1]}" "gasUsed=$_gasUsed" "status=$_status"

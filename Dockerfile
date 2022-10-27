@@ -23,12 +23,6 @@ RUN apk --no-cache add git
 
 ARG CGO_ENABLED=0
 
-# installing seth
-WORKDIR /go/src/dapptools
-ARG SETH_REF="tags/seth/0.11.0"
-RUN git clone https://github.com/dapphub/dapptools.git . \
-  && git checkout --quiet ${SETH_REF} 
-
 WORKDIR /go/src/omnia
 ARG ETHSIGN_REF="tags/v1.11.0"
 RUN git clone https://github.com/chronicleprotocol/omnia.git . \
@@ -67,15 +61,12 @@ RUN wget -q -O ${GLIBC_KEY_FILE} ${GLIBC_KEY} \
   && apk add glibc.apk --force
 
 COPY --from=rust-builder /opt/foundry/target/release/cast /usr/local/bin/cast
-COPY --from=go-builder /go/src/dapptools/src/seth/ /opt/seth/
 COPY --from=go-builder \
   /go/src/omnia/ethsign/ethsign \
   /go/src/oracle-suite/spire \
   /go/src/oracle-suite/gofer \
   /go/src/oracle-suite/ssb-rpc-client \
   /usr/local/bin/
-
-COPY ./docker/geth/bin/hevm-0.48.1 /usr/local/bin/hevm
 
 RUN pip install --no-cache-dir mpmath sympy ecdsa==0.16.0
 
@@ -122,12 +113,11 @@ USER ${USER}:${GROUP}
 # Removing notification from `parallel`
 RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
 
-# Setting up PATH for seth, setzer and omnia bin folder
+# Setting up PATH for setzer and omnia bin folder
 # Here we have set of different pathes included:
-# - /opt/seth - For `seth` executable
 # - /opt/setzer - For `setzer` executable
 # - /opt/omnia/bin - Omnia executables
 # - /opt/omnia/exec - Omnia transports executables
-ENV PATH="/opt/seth/bin:/opt/setzer/bin:/opt/omnia/bin:/opt/omnia/exec:${PATH}"
+ENV PATH="/opt/setzer/bin:/opt/omnia/bin:/opt/omnia/exec:${PATH}"
 
 CMD ["omnia"]
