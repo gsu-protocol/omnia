@@ -42,9 +42,9 @@ pullOraclePrice () {
 signTxBeforePush() {
 	local _to="$1"
 	local data="$2"
+	local _fees="$3"
 
 	# Using custom gas pricing strategy
-	local _fees=($(getGasPrice))
 	local _gasPrice="${_fees[0]}"
 	local _gasPrio="${_fees[1]}"
 
@@ -80,6 +80,8 @@ pushOraclePrice () {
 		local _assetPair="$1"
 		local _oracleContract
 
+		local _fees=($(getGasPrice))
+
 		_oracleContract=$(getOracleContract "$_assetPair")
 		if ! [[ "$_oracleContract" =~ ^(0x){1}[0-9a-fA-F]{40}$ ]]; then
 		  error "Error - Invalid Oracle contract"
@@ -102,7 +104,7 @@ pushOraclePrice () {
 		# signing tx, cast dont dupport ethsign, so have to do it manually
 		# TODO: add "${_gasParams[@]}"
 		local _txdata
-		_txdata=$(signTxBeforePush $_oracleContract $_calldata)
+		_txdata=$(signTxBeforePush $_oracleContract $_calldata $_fees)
 
 		log "Sending tx..."
 		tx=$(ethereum publish --rpc-url "$ETH_RPC_URL" $_txdata)
