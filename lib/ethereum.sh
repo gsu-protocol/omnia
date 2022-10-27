@@ -107,7 +107,7 @@ pushOraclePrice () {
 		_txdata=$(signTxBeforePush $_oracleContract $_calldata $_fees)
 
 		log "Sending tx..."
-		tx=$(ethereum publish --rpc-url "$ETH_RPC_URL" $_txdata)
+		tx=$(timeout -s9 60 ethereum publish --rpc-url "$ETH_RPC_URL" $_txdata)
 		
 		_status="$(jq '.status' <<<"$tx")"
 		_status="$(jq '.gasUsed' <<<"$tx")"
