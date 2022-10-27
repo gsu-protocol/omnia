@@ -102,7 +102,6 @@ pushOraclePrice () {
 				"[$(join "${allS[@]}")]")
 
 		# signing tx, cast dont dupport ethsign, so have to do it manually
-		# TODO: add "${_gasParams[@]}"
 		local _txdata
 		_txdata=$(signTxBeforePush $_oracleContract $_calldata $_fees)
 
