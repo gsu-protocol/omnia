@@ -88,11 +88,6 @@ pushOraclePrice () {
 		  return 1
 		fi
 
-		local _gasParams
-		_gasParams=(--rpc-url "$ETH_RPC_URL" --gas-price "${_fees[0]}")
-		[[ $ETH_TX_TYPE -eq 2 ]] && _gasParams+=(--prio-fee "${_fees[1]}")
-		_gasParams+=(--gas "$ETH_GAS")
-
 		local _calldata
 		_calldata=$(ethereum calldata 'poke(uint256[] memory,uint256[] memory,uint8[] memory,bytes32[] memory,bytes32[] memory)' \
 				"[$(ethereum --to-base $(join "${allPrices[@]}") d)]" \
