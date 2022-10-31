@@ -88,6 +88,7 @@ pushOraclePrice () {
 		  return 1
 		fi
 
+
 		local _calldata
 		_calldata=$(ethereum calldata 'poke(uint256[] memory,uint256[] memory,uint8[] memory,bytes32[] memory,bytes32[] memory)' \
 				"[$(ethereum --to-base $(join "${allPrices[@]}") d)]" \
