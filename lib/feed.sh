@@ -17,8 +17,7 @@ readSourcesAndBroadcastAllPriceMessages()  {
 			break
 		fi
 
-		readSource "$_src" "${!_unpublishedPairs[@]}" \
-		| while IFS= read -r _json
+		while IFS= read -r _json
 		do
 			if [[ -z "$_json" ]]; then
 				continue
@@ -43,7 +42,7 @@ readSourcesAndBroadcastAllPriceMessages()  {
 			unset _unpublishedPairs["$_assetPair"]
 
 			transportPublish "$_assetPair" "$_message" || error "all transports failed" "asset=$_assetPair"
-		done
+		done < <(readSource "$_src" "${!_unpublishedPairs[@]}")
 	done
 }
 
@@ -51,20 +50,30 @@ readSource() {
 	local _src="${1,,}"
 	local _assetPairs=("${@:2}")
 
-	verbose --list "readSource" "src=$_src" "${_assetPairs[@]}"
+	verbose --list "read source" "src=$_src" "${_assetPairs[@]}"
 
 	case "$_src" in
 		setzer|gofer)
 			for _assetPair in "${_assetPairs[@]}"; do
-				log "Querying price and calculating median" "source=$_src" "asset=${_assetPair}"
+				log "querying price and calculating median" "source=$_src" "asset=${_assetPair}"
 
-				"source-$_src" "$_assetPair" \
-				| tee >(_data="$(cat)"; [[ -z "$_data" ]] || verbose --raw "source-$_src" "$(jq -sc <<<"$_data")") \
-				|| error "Failed to get price" "app=source-$_src" "asset=$_assetPair"
+				local _data
+				if _data="$("source-$_src" "$_assetPair")"
+				then
+					if [[ -n "$_data" ]]
+					then
+						verbose --raw "source-$_src" "$(jq -sc <<<"$_data")"
+						echo "$_data"
+					else
+						error "no data from source" "app=source-$_src" "asset=$_assetPair"
+					fi
+				else
+					error "failed to get price" "app=source-$_src" "asset=$_assetPair"
+				fi
 			done
 			;;
 		*)
-			error "Unknown Feed Source: $_src"
+			error "unknown Feed Source: $_src"
 			return 1
 			;;
 	esac
