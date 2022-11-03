@@ -22,6 +22,7 @@ _mapSetzer() {
 			'{($s):$p}'
 	else
 		error "failed to get asset price" "asset=$_assetPair" "source=$_source"
+		return 1
 	fi
 }
 
@@ -32,19 +33,25 @@ readSourcesWithSetzer()  {
 	_setzerAssetPair="${_setzerAssetPair,,}"
 
 	local _prices
-	_prices=$(setzer sources "$_setzerAssetPair" \
-	| while IFS= read -r _src; do _mapSetzer "$_setzerAssetPair" "$_src"; done)
+	_prices="$(while IFS= read -r _src; do _mapSetzer "$_setzerAssetPair" "$_src"; done < <(setzer sources "$_setzerAssetPair"))"
 
-  # Check minimal available prices for setzer
-  _length=$(jq 'add|tonumber' <<<"$_prices" | jq -s 'length')
-  if [[ $_length -lt $SETZER_MIN_MEDIAN ]]; then
-    error "Error: not enough sources to provide a median: ${#_prices[@]} < $SETZER_MIN_MEDIAN"
-    return 1
-  fi
+	# Check minimal available prices for setzer
+	local _length
+	_length="$(jq 'add|tonumber' <<<"$_prices" | jq -s 'length')"
+	if [[ $_length -lt $SETZER_MIN_MEDIAN ]]; then
+		error "Error: not enough sources to provide a median: ${#_prices[@]} < $SETZER_MIN_MEDIAN"
+		return 1
+	fi
 
 	local _median
-	_median=$(jq 'add|tonumber' <<<"$_prices" \
-	| jq -s 'sort | if length == 0 then null elif length % 2 == 0 then (.[length/2] + .[length/2-1])/2 else .[length/2|floor] end')
+	case "$_setzerAssetPair" in
+		rethusd)
+			_median="$(setzer price "$_setzerAssetPair")"
+			;;
+		*)
+			_median="$(jq 'add|tonumber' <<<"$_prices" | jq -s 'sort | if length == 0 then null elif length % 2 == 0 then (.[length/2] + .[length/2-1])/2 else .[length/2|floor] end')"
+			;;
+	esac
 
 	local _output
 	_output="$(jq -cs \
