@@ -22,7 +22,6 @@ _mapSetzer() {
 			'{($s):$p}'
 	else
 		error "failed to get asset price" "asset=$_assetPair" "source=$_source"
-		return 1
 	fi
 }
 

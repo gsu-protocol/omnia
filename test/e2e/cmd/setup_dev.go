@@ -9,6 +9,8 @@ import (
 	"github.com/chronicleprotocol/infestor/smocker"
 )
 
+const smockerPort = 8081
+
 func main() {
 	smockerHost, exist := os.LookupEnv("SMOCKER_HOST")
 	if !exist {
@@ -16,8 +18,7 @@ func main() {
 	}
 
 	api := smocker.API{
-		Host: smockerHost,
-		Port: 8081,
+		fmt.Sprintf("%s:%d", smockerHost, smockerPort),
 	}
 
 	err := infestor.NewMocksBuilder().

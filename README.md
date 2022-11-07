@@ -123,9 +123,24 @@ To setup environment you can use this command:
 $ docker-compose -f .github/docker-compose-e2e-tests.yml run omnia_e2e 
 ```
 
-### E2E Tests Development
+### E2E Tests for Development
 
-For tests development process we created additional image `omnia_e2e_dev`.
+First of all for E2E tests we are using special image `ghcr.io/chronicleprotocol/omnia:dev`.
+And to use it with your locl omnia version - you have to build it by yourself.
+
+```bash
+$ docker build -t ghcr.io/chronicleprotocol/omnia:dev .
+```
+
+If you already have this image on your local machine - you have to rebuild it!
+
+```bash
+$ docker rmi ghcr.io/chronicleprotocol/omnia:dev
+```
+
+For tests development process we created additional image `omnia_e2e_dev` that will be built
+from your current environment and will link local `lib`, `exec` and `transport-e2e` volumes.
+**NOTE:** This image will be built on `ghcr.io/chronicleprotocol/omnia:dev`, see `test/e2e/Dockerfile`.
 
 Run it:
 
@@ -138,6 +153,18 @@ From here you might run E2E tests using command:
 
 ```bash
 $ go test -v -p 1 -parallel 1 -cpu 1 ./...
+```
+
+#### Running omnia feed tests
+
+```bash
+$ go test -v -p 1 -parallel 1 -cpu 1 ./feed
+```
+
+#### Running omnia Relayer tests
+
+```bash
+$ go test -v -p 1 -parallel 1 -cpu 1 ./relay
 ```
 
 **NB !!!**
