@@ -12,7 +12,7 @@
     "setzerTimeout": 10,
     "setzerCacheExpiry": 120,
     "setzerMinMedian": 3,
-    "setzerEthRpcUrl": ""
+    "setzerEthRpcUrl": "http://geth.local:8545"
   },
   "sources":["gofer","setzer"],
   "transports":["spire","ssb-rpc"],
