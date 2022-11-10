@@ -23,7 +23,9 @@ getGasPrice() {
 	local _maxPrice
 	_maxPrice=$(echo "(${_fees[0]} * $ETH_MAXPRICE_MULTIPLIER) / 1" | bc)
 	local _tip
-  _tip=$(echo "(${_fees[1]} * $ETH_TIP_MULTIPLIER) / 1" | bc)
+	if  [[ ${_fees[1]} =~ ^[0-9\.]+$ ]]; then
+		_tip=$(echo "(${_fees[1]} * $ETH_TIP_MULTIPLIER) / 1" | bc)
+	fi
 
   echo "$_maxPrice $_tip"
 }
