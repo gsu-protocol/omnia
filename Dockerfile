@@ -33,7 +33,7 @@ RUN git clone https://github.com/chronicleprotocol/omnia.git . \
 
 # Building gofer & spire
 WORKDIR /go/src/oracle-suite
-ARG ORACLE_SUITE_REF="tags/v0.6.11"
+ARG ORACLE_SUITE_REF="tags/v0.7.2"
 RUN git clone https://github.com/chronicleprotocol/oracle-suite.git . \
   && git checkout --quiet ${ORACLE_SUITE_REF}
 
