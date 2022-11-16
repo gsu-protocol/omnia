@@ -122,7 +122,7 @@ func (s *RelayBaseBehaviourE2ESuite) TestInvalidPriceMessage() {
 	msg.Price = -1.0
 
 	err = e2e.WriteOmniaMessage(msg)
-	s.Require().NoError(err)
+	s.Require().NoError(err, err)
 
 	err = s.Omnia.Start()
 	s.Require().NoError(err)

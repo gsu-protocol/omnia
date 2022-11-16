@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	OmniaDefaultTimeout = 10 * time.Second
+	OmniaDefaultTimeout = 30 * time.Second
 	smockerPort         = 8081
 )
 

@@ -93,7 +93,7 @@ generateCalldata () {
         _v=${_sig:128:2}
         allR+=( "0x${_sig:0:64}" )
         allS+=( "0x${_sig:64:64}" )
-        allV+=( "$(ethereum --to-word "0x$_v" )" )
+        allV+=( "$(ethereum --to-uint256 "0x$_v" )" )
         allPrices+=( "0x$( echo "$msg" | jq -r '.priceHex' )" )
         allTimes+=( "0x$( echo "$msg" | jq -r '.timeHex' )" )
     done
