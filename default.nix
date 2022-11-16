@@ -1,5 +1,7 @@
-{ stdenv, makeWrapper, symlinkJoin, lib, glibcLocales, coreutils, bash, parallel, bc, jq, gnused, datamash, gnugrep, curl
-, ethsign, foundry, setzer, ssb-server, oracle-suite, oracleVersion ? "0.0.0-dev" }:
+{ stdenv, makeWrapper, symlinkJoin, lib, glibcLocales, coreutils, bash, parallel, bc, jq, gnused,
+datamash, gnugrep, curl,
+ethsign, foundry, setzer,
+ssb-server, oracle-suite, oracleVersion ? "0.0.0-dev" }:
 stdenv.mkDerivation rec {
   name = "omnia-${version}";
   version = lib.fileContents ./version;

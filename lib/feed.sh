@@ -137,7 +137,6 @@ validateAndConstructMessage() {
 
 	#Convert timestamp to hex
 	timeHex=$(time2Hex "$time")
-	timeHex=${timeHex#"0x"}
 	if [[ ! "$timeHex" =~ ^[0-9a-fA-F]{64}$ ]]; then
 		error "Failed to convert timestamp to hex"
 		debug "Invalid Timestamp Hex" "timestamp=$time" "hex=$timeHex"
