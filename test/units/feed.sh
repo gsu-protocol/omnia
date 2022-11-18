@@ -36,7 +36,6 @@ importTransports "$_json"
 
 assert "readSource should fail on incorrect source" fail readSource "json" "BAT/USD"
 
-export OMNIA_DEBUG="true"
 # validateAndConstructMessage
 _assetPair="BAT/USD"
 _json=$(jq -c '.asset = "'$_assetPair'"' "$messages_path/setzer.json")
