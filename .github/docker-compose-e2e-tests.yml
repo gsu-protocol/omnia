@@ -66,6 +66,7 @@ services:
       - "../:/app"
       - "../lib:/opt/omnia/lib/"
       - "../exec:/opt/omnia/exec"
-      - "../test/e2e/bin/transport-e2e:/opt/omnia/exec/transport-e2e"
+      - "../test/e2e/bin/transport-e2e:/usr/local/bin/transport-e2e"
+      - "../test/e2e/bin/sign-message:/usr/local/bin/sign-message"
     command:
       - "bash"

@@ -50,8 +50,8 @@ ENV OMNIA_INTERVAL=1 \
 
 ENV GETH_RPC_URL="http://geth.local:8545"
 
-COPY ./test/e2e/bin/transport-e2e /opt/omnia/exec
-COPY ./test/e2e/bin/sign-message /opt/omnia/exec
+COPY ./test/e2e/bin/transport-e2e /usr/local/bin/
+COPY ./test/e2e/bin/sign-message /usr/local/bin/
 # Copy sources
 COPY . /app
 

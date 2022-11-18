@@ -1,7 +1,7 @@
 {
   "spire": {
     "rpc": {
-      "address": "spire_relay.local:9100"
+      "address": "spire_relay.local:9102"
     }
   }
 }

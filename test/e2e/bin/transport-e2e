@@ -8,7 +8,16 @@ OMNIA_TRANSPORT_E2E_FILE=${OMNIA_TRANSPORT_E2E_FILE:-$(mktemp)}
 _command="$1"
 case "$_command" in
 	push|publish)
-		_val=$(seth --to-wei "$(jq -r '.price' <<<"$2")" eth)
+		_price=$(jq -r '.price' <<<"$2")
+		# This is additional hack to allow sending negative prices.
+		# Without it `cast` will fail and you wouldn't be able to deliver invalid price to omnia
+		if [ $_price -lt 0 ]
+		then
+			_price=$(echo "$_price * -1" | bc)
+			_val="-$(cast --to-wei "$_price" eth)"
+		else
+			_val=$(cast --to-wei "$_price" eth)
+		fi
 		_msg=$(jq --arg val "$_val" -c '{
 			price: {
 				wat: .type,
@@ -27,8 +36,8 @@ case "$_command" in
 		_assetPair="$3"
 		_feedId="$2"
 		_msg=$(tail -n 1 "$OMNIA_TRANSPORT_E2E_FILE") || exit $?
-		_priceHex=$(seth --to-uint256 "$(jq -r '.price.val' <<<"$_msg")" | sed s/^0x//)
-		_timeHex=$(seth --to-uint256 "$(jq -r '.price.age' <<<"$_msg")" | sed s/^0x//)
+		_priceHex=$(cast --to-uint256 "$(jq -r '.price.val' <<<"$_msg")" | sed s/^0x//)
+		_timeHex=$(cast --to-uint256 "$(jq -r '.price.age' <<<"$_msg")" | sed s/^0x//)
 
 		jq -c --arg ph "$_priceHex" --arg th "$_timeHex" '{
 			type: .price.wat,

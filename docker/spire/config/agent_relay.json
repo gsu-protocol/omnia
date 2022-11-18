@@ -7,10 +7,10 @@
   "transport": {
     "libp2p": {
       "privKeySeed": "",
-      "listenAddrs": ["/ip4/0.0.0.0/tcp/8000"],
+      "listenAddrs": ["/ip4/0.0.0.0/tcp/8102"],
       "bootstrapAddrs": [],
       "directPeersAddrs": [
-        "/dns4/spire_feed.local/tcp/8000/p2p/12D3KooWJ97nwcSoWVQJ7o6BuuBqGtY8xaFbPCptfwo1b2f8cr3o"
+        "/dns4/spire_feed.local/tcp/8101/p2p/12D3KooWJ97nwcSoWVQJ7o6BuuBqGtY8xaFbPCptfwo1b2f8cr3o"
       ],
       "blockedAddrs": [],
       "disableDiscovery": false
@@ -23,14 +23,11 @@
   ],
   "spire": {
     "rpc": {
-      "address": "0.0.0.0:9100"
+      "address": "0.0.0.0:9102"
     },
     "pairs": [
-      "BATUSD",
       "BTCUSD",
-      "ETHUSD",
-      "KNCUSD",
-      "MANAUSD"
+      "ETHUSD"
     ]
   }
 }
