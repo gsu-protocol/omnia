@@ -1,13 +1,10 @@
 name: Build & Push Production Docker Images
 on:
   workflow_dispatch: # Allow manual trigger
-  workflow_run:
-    workflows: ["Build & Push Production Base omnia Docker Images"] # Depend on success from base image
-    types:
-      - completed
+  push: # Build & release on tags
     tags:
       - 'v*'
-    branches: 
+    branches:
       - develop
       - master
 
