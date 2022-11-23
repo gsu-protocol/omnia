@@ -1,6 +1,5 @@
 name: Build & Push Production Base omnia Docker Images
-on:
-  workflow_dispatch: # Allow manual trigger only. We have manually controll execution phase
+on: workflow_dispatch # Allow manual trigger only. We have manually controll execution phase
 
 jobs:
   build:
