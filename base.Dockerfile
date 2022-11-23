@@ -17,7 +17,7 @@ ARG CAST_REF="master"
 RUN git clone https://github.com/foundry-rs/foundry.git . \
   && git checkout --quiet ${CAST_REF} 
 
-RUN source $HOME/.profile && cargo build --release --package cast \
+RUN source $HOME/.profile && cargo build --release --bin cast \
   && strip /opt/foundry/target/release/cast
 
 FROM python:3.9-alpine3.16

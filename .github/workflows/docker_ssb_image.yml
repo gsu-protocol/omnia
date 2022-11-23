@@ -4,9 +4,6 @@ on:
   push: # Build & release on tags
     tags:
       - 'v*'
-    branches:
-      - develop
-      - master
 
 jobs:
   build:
