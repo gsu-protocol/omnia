@@ -1,6 +1,8 @@
 FROM alpine:3.16 as rust-builder
 ARG TARGETARCH
 
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
+
 WORKDIR /opt
 RUN apk add clang lld curl build-base linux-headers git \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh \
@@ -15,7 +17,7 @@ ARG CAST_REF="master"
 RUN git clone https://github.com/foundry-rs/foundry.git . \
   && git checkout --quiet ${CAST_REF} 
 
-RUN source $HOME/.profile && cargo build --release \
+RUN source $HOME/.profile && cargo build --release --package cast \
   && strip /opt/foundry/target/release/cast
 
 FROM python:3.9-alpine3.16
