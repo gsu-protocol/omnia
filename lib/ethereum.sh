@@ -88,11 +88,15 @@ pushOraclePrice () {
 		  return 1
 		fi
 
+		allPricesArr=($(for price in "${allPrices[@]}"; do ethereum --to-base "$price" d; done))
+		allTimesArr=($(for price in "${allTimes[@]}"; do ethereum --to-base "$price" d; done))
+		allVsArr=($(for price in "${allV[@]}"; do ethereum --to-base "$price" d; done))
+
 		local _calldata
 		_calldata=$(ethereum calldata 'poke(uint256[] memory,uint256[] memory,uint8[] memory,bytes32[] memory,bytes32[] memory)' \
-				"[$(ethereum --to-base $(join "${allPrices[@]}") d)]" \
-				"[$(ethereum --to-base $(join "${allTimes[@]}") d)]" \
-				"[$(ethereum --to-base $(join "${allV[@]}") d)]" \
+				"[$(join "${allPricesArr[@]}")]" \
+				"[$(join "${allTimesArr[@]}")]" \
+				"[$(join "${allVsArr[@]}")]" \
 				"[$(join "${allR[@]}")]" \
 				"[$(join "${allS[@]}")]")
 
