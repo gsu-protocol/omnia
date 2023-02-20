@@ -133,7 +133,7 @@ services:
       - "/home/usman/.ethereum/keystore/:/home/usman/.ethereum/keystore/"
     environment:
       ETH_RPC_URL: "http://localhost:8545"
-      ETH_FROM: "0x125fC0CcCDee5ac474062F6358d4d056b0430b84"
+      ETH_FROM: "<Wallet-address>"
       ETH_GAS_SOURCE: "node"
       ETH_MAXPRICE_MULTIPLIER: 1
       OMNIA_VERBOSE: "true"
