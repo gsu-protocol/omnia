@@ -24,8 +24,8 @@ RUN apk --no-cache add git
 ARG CGO_ENABLED=0
 
 WORKDIR /go/src/omnia
-ARG ETHSIGN_REF="tags/v1.11.0"
-RUN git clone https://github.com/chronicleprotocol/omnia.git . \
+ARG ETHSIGN_REF="master"
+RUN git clone https://github.com/gsu-protocol/omnia.git . \
   && git checkout --quiet ${ETHSIGN_REF} \
   && cd ethsign \
   && go mod vendor \
@@ -33,8 +33,8 @@ RUN git clone https://github.com/chronicleprotocol/omnia.git . \
 
 # Building gofer & spire
 WORKDIR /go/src/oracle-suite
-ARG ORACLE_SUITE_REF="tags/v0.7.2"
-RUN git clone https://github.com/chronicleprotocol/oracle-suite.git . \
+ARG ORACLE_SUITE_REF="master"
+RUN git clone https://github.com/gsu-protocol/oracle-suite.git . \
   && git checkout --quiet ${ORACLE_SUITE_REF}
 
 RUN go mod vendor \
@@ -118,6 +118,6 @@ RUN printf 'will cite' | parallel --citation 1>/dev/null 2>/dev/null; exit 0
 # - /opt/setzer - For `setzer` executable
 # - /opt/omnia/bin - Omnia executables
 # - /opt/omnia/exec - Omnia transports executables
-ENV PATH="/opt/setzer/bin:/opt/omnia/bin:/opt/omnia/exec:${PATH}"
+ENV PATH="/opt/setzer/bin:/opt/omnia/bin:/opt/omnia/exec:/opt/setzer/bin:${PATH}"
 
 CMD ["omnia"]
