@@ -76,8 +76,8 @@ COPY ./lib /opt/omnia/lib/
 COPY ./version /opt/omnia/version
 
 # Installing setzer
-ARG SETZER_REF="tags/v0.5.1"
-RUN git clone https://github.com/chronicleprotocol/setzer.git \
+ARG SETZER_REF="master"
+RUN git clone https://github.com/gsu-protocol/setzer.git \
   && cd setzer \
   && git checkout --quiet ${SETZER_REF} \
   && mkdir /opt/setzer/ \
