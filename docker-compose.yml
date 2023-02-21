@@ -55,7 +55,7 @@ services:
     entrypoint: [ "/usr/local/bin/spire" ]
     command: [ "-c", "/etc/spire.json", "agent", "-v", "info" ]
     volumes:
-      - "<Your_keystore_path>:<keystore_path_in_config_files>"
+      - "~/.ethereum:/home/omnia/.ethereum"
       - "./config/spire1.json:/etc/spire.json"
 
   spire_relay:
@@ -69,7 +69,7 @@ services:
     entrypoint: [ "/usr/local/bin/spire" ]
     command: [ "-c", "/etc/spire.json", "agent", "-v", "info" ]
     volumes:
-      - "<Your_keystore_path>:<keystore_path_in_config_files>"
+      - "~/.ethereum:/home/omnia/.ethereum"
       - "./config/spire1.json:/etc/spire.json"
 
   omnia_feed:
@@ -88,7 +88,7 @@ services:
       - "./config/omnia_feed1.json:/home/omnia/omnia.json"
       - "./config/spire1.json:/home/omnia/spire.json"
       - "./config/gofer.json:/home/omnia/gofer.json"
-      - "<Your_keystore_path>:<keystore_path_in_config_files>"
+      - "~/.ethereum:/home/omnia/.ethereum"
 
     environment:
       SSB_KEYS: "/home/omnia/.ssb/secret"
@@ -114,7 +114,7 @@ services:
       - "../dapptools/src/seth/:/opt/seth/"
       - "./config/omnia_relay.json:/home/omnia/omnia.json"
       - "./config/spire1.json:/home/omnia/spire.json"
-      - "<Your_keystore_path>:<keystore_path_in_config_files>"
+      - "~/.ethereum:/home/omnia/.ethereum"
     environment:
       OMNIA_VERBOSE: "true"
 
