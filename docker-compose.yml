@@ -34,7 +34,6 @@ services:
       - "--http.corsdomain=*"
       - "--http.vhosts=*"
       - "--rpc.allow-unprotected-txs"
-
   gofer:
     container_name: gofer.local
     build:
