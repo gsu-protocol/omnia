@@ -9,7 +9,6 @@ services:
       - "8545:8545"
       - "30303:30303"
     volumes:
-      # - "./docker/geth/data:/home/geth/data"
       - "./docker/geth/config:/home/geth/config"
       - "./docker/keystore:/home/geth/keystore"
     command:
@@ -36,14 +35,6 @@ services:
       - "--http.vhosts=*"
       - "--rpc.allow-unprotected-txs"
 
-  # deployer:
-  #   build:
-  #     context: "."
-  #     dockerfile: "docker/deployer/Dockerfile"
-  #   volumes:
-  #     - "./docker/geth/bin/:/root/bin"
-  #   command: ["median-deploy", "BATUSD", "BTCUSD", "ETHUSD", "KNCUSD", "MANAUSD", "0x1bb90cde8a032cb4963813a5b4db4981afa5b9c6", "0x3980aa37f838bec2e457445d943feb3af98ff036"]
-
   gofer:
     container_name: gofer.local
     build:
@@ -64,7 +55,7 @@ services:
     entrypoint: [ "/usr/local/bin/spire" ]
     command: [ "-c", "/etc/spire.json", "agent", "-v", "info" ]
     volumes:
-      - "/home/usman/.ethereum/keystore/:/home/usman/.ethereum/keystore/"
+      - "<Your_keystore_path>:<keystore_path_in_config_files>"
       - "./config/spire1.json:/etc/spire.json"
 
   spire_relay:
@@ -78,7 +69,7 @@ services:
     entrypoint: [ "/usr/local/bin/spire" ]
     command: [ "-c", "/etc/spire.json", "agent", "-v", "info" ]
     volumes:
-      - "/home/usman/.ethereum/keystore/:/home/usman/.ethereum/keystore/"
+      - "<Your_keystore_path>:<keystore_path_in_config_files>"
       - "./config/spire1.json:/etc/spire.json"
 
   omnia_feed:
@@ -94,13 +85,10 @@ services:
       - "./lib:/opt/omnia/lib"
       - "./exec:/opt/omnia/exec"
       - "./test:/opt/omnia/test"
-
       - "./config/omnia_feed1.json:/home/omnia/omnia.json"
       - "./config/spire1.json:/home/omnia/spire.json"
       - "./config/gofer.json:/home/omnia/gofer.json"
-
-      - "/home/usman/.ethereum/keystore/:/home/omnia/.ethereum/keystore/"
-      - "/home/usman/.ethereum/keystore/:/home/usman/.ethereum/keystore/"
+      - "<Your_keystore_path>:<keystore_path_in_config_files>"
 
     environment:
       SSB_KEYS: "/home/omnia/.ssb/secret"
@@ -109,7 +97,6 @@ services:
       SSB_PORT: "8000"
       OMNIA_VERBOSE: "true"
       gofer: "/usr/local/bin/gofer"
-#      OMNIA_LOG_FORMAT: "json"
 
   omnia_relay:
     depends_on:
@@ -124,20 +111,13 @@ services:
       - "./lib:/opt/omnia/lib"
       - "./exec:/opt/omnia/exec"
       - "./test:/opt/omnia/test"
-
       - "../dapptools/src/seth/:/opt/seth/"
-
       - "./config/omnia_relay.json:/home/omnia/omnia.json"
       - "./config/spire1.json:/home/omnia/spire.json"
-      - "./docker/keystore/:/home/omnia/.ethereum/keystore/"
-      - "/home/usman/.ethereum/keystore/:/home/usman/.ethereum/keystore/"
+      - "<Your_keystore_path>:<keystore_path_in_config_files>"
     environment:
-      ETH_RPC_URL: "http://localhost:8545"
-      ETH_FROM: "<Wallet-address>"
-      ETH_GAS_SOURCE: "node"
-      ETH_MAXPRICE_MULTIPLIER: 1
       OMNIA_VERBOSE: "true"
-#      OMNIA_LOG_FORMAT: "json"
+
 networks:
   default:
     name: omnia_network
